@@ -8,7 +8,7 @@ interface IPassageiroRepository {
     // conta já existe e está logada, só falta o perfil de passageiro), sobe a
     // foto, grava perfil + reserva do CPF juntos e manda o e-mail de
     // confirmação. Qualquer falha no caminho desfaz a conta recém-criada.
-    suspend fun cadastrar(passageiro: Passageiro, senha: String?, foto: Uri): Result<Unit>
+    suspend fun cadastrar(passageiro: Passageiro, senha: String?, foto: Uri): Result<ResultadoCadastro>
 
     suspend fun buscar(uid: String): Result<Passageiro?>
 

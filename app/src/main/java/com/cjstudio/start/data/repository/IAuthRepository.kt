@@ -14,9 +14,14 @@ interface IAuthRepository {
     // com EmailNaoVerificadoException. Devolve o uid.
     suspend fun entrar(email: String, senha: String): Result<String>
 
-    // Cria a conta e deixa ela logada (o cadastro ainda precisa dela pra subir
-    // as fotos e gravar o perfil). E-mail repetido = EmailJaCadastradoException.
-    suspend fun criarConta(email: String, senha: String): Result<String>
+    // Conta pro cadastro, deixada logada (o cadastro ainda precisa dela pra
+    // subir as fotos e gravar o perfil). Uma pessoa = uma conta pra tudo
+    // (admin, motorista, passageiro): se o e-mail já existe e a senha é a
+    // dessa conta, entra nela (nova = false); senha diferente =
+    // EmailJaCadastradoException.
+    suspend fun criarOuEntrarConta(email: String, senha: String): Result<ContaCadastro>
+
+    fun emailVerificado(): Boolean
 
     suspend fun enviarVerificacaoEmail(): Result<Unit>
 

@@ -23,17 +23,15 @@ class MotoristaRepository @Inject constructor(
 
     private fun colecao() = db.get().collection(COLECAO)
 
-    override suspend fun cadastrar(motorista: Motorista, senha: String?, foto: Uri, fotoCnh: Uri, fotoCrlv: Uri): Result<Unit> {
-        var contaCriadaAgora = false
+    override suspend fun cadastrar(motorista: Motorista, senha: String?, foto: Uri, fotoCnh: Uri, fotoCrlv: Uri): Result<ResultadoCadastro> {
+        var conta: ContaCadastro? = null
         return try {
             val cpf = motorista.cpf ?: throw IllegalArgumentException("CPF obrigatório.")
-            val uid = if (senha != null) {
-                auth.criarConta(motorista.email.orEmpty(), senha).getOrThrow().also { contaCriadaAgora = true }
-            } else {
-                // Conta já existente: o e-mail do perfil é o da conta.
-                motorista.email = auth.emailLogado()
-                auth.uidLogado() ?: throw IllegalStateException("Sessão expirada. Entre de novo.")
-            }
+            conta = FluxoCadastro.obterConta(auth, motorista.email, senha)
+            val uid = conta.uid
+            // O e-mail do perfil é sempre o da conta.
+            motorista.email = auth.emailLogado()
+            FluxoCadastro.garantirSemPerfil(colecao().document(uid))
 
             ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid)
             motorista.fotoUrl = arquivos.enviarImagem("fotos_perfil/$uid", foto).getOrThrow()
@@ -47,15 +45,9 @@ class MotoristaRepository @Inject constructor(
                 .set(colecao().document(uid), motorista)
                 .commit().await()
 
-            if (contaCriadaAgora) {
-                auth.enviarVerificacaoEmail()
-                auth.sair()
-            } else {
-                auth.lembrarSessao(uid)
-            }
-            Result.success(Unit)
+            Result.success(FluxoCadastro.concluir(auth, conta))
         } catch (e: Exception) {
-            if (contaCriadaAgora) auth.excluirContaAtual()
+            FluxoCadastro.desfazer(auth, conta, veioDoCadastro = senha != null)
             Result.failure(e)
         }
     }

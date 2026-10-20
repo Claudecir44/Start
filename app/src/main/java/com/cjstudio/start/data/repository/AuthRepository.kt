@@ -8,6 +8,7 @@ import com.cjstudio.start.data.model.EmailNaoVerificadoException
 import com.cjstudio.start.di.KEY_UID
 import com.cjstudio.start.di.KEY_ULTIMO_REENVIO_VERIFICACAO
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
@@ -64,13 +65,28 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    override suspend fun criarConta(email: String, senha: String): Result<String> = runCatching {
+    override suspend fun criarOuEntrarConta(email: String, senha: String): Result<ContaCadastro> = runCatching {
         try {
-            auth.get().createUserWithEmailAndPassword(email, senha).await().user?.uid
+            val uid = auth.get().createUserWithEmailAndPassword(email, senha).await().user?.uid
                 ?: throw IllegalStateException("Falha ao criar a conta.")
+            ContaCadastro(uid, nova = true)
         } catch (e: FirebaseAuthUserCollisionException) {
-            throw EmailJaCadastradoException()
+            // A mesma pessoa pode ser admin, motorista e passageiro com UMA conta
+            // só: e-mail já existente + a senha dessa conta = usa a conta.
+            val usuario = try {
+                auth.get().signInWithEmailAndPassword(email, senha).await().user
+            } catch (_: FirebaseAuthInvalidCredentialsException) {
+                null
+            } ?: throw EmailJaCadastradoException()
+            usuario.reload().await()
+            ContaCadastro(usuario.uid, nova = false)
         }
+    }
+
+    override fun emailVerificado(): Boolean = try {
+        auth.get().currentUser?.isEmailVerified == true
+    } catch (_: Exception) {
+        false
     }
 
     override suspend fun enviarVerificacaoEmail(): Result<Unit> = runCatching {

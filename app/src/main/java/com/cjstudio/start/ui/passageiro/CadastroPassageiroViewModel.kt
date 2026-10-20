@@ -13,6 +13,7 @@ import com.cjstudio.start.ui.common.paraUiTexto
 import com.cjstudio.start.ui.common.texto
 import com.cjstudio.start.util.CpfUtil
 import com.cjstudio.start.util.Validacao
+import com.cjstudio.start.data.repository.ResultadoCadastro
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -83,7 +84,7 @@ class CadastroPassageiroViewModel @Inject constructor(
             _enviando.value = false
             _eventos.send(
                 resultado.fold(
-                    { if (completandoCadastro) Evento.IrParaInicio else Evento.ConfirmarEmail(form.email.trim()) },
+                    { fim -> if (fim == ResultadoCadastro.PRONTO) Evento.IrParaInicio else Evento.ConfirmarEmail(form.email.trim().ifBlank { "seu e-mail" }) },
                     { Evento.Mensagem(it.paraUiTexto()) }
                 )
             )

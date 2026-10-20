@@ -18,17 +18,15 @@ class PassageiroRepository @Inject constructor(
 
     private fun colecao() = db.get().collection(COLECAO)
 
-    override suspend fun cadastrar(passageiro: Passageiro, senha: String?, foto: Uri): Result<Unit> {
-        var contaCriadaAgora = false
+    override suspend fun cadastrar(passageiro: Passageiro, senha: String?, foto: Uri): Result<ResultadoCadastro> {
+        var conta: ContaCadastro? = null
         return try {
             val cpf = passageiro.cpf ?: throw IllegalArgumentException("CPF obrigatório.")
-            val uid = if (senha != null) {
-                auth.criarConta(passageiro.email.orEmpty(), senha).getOrThrow().also { contaCriadaAgora = true }
-            } else {
-                // Conta já existente: o e-mail do perfil é o da conta.
-                passageiro.email = auth.emailLogado()
-                auth.uidLogado() ?: throw IllegalStateException("Sessão expirada. Entre de novo.")
-            }
+            conta = FluxoCadastro.obterConta(auth, passageiro.email, senha)
+            val uid = conta.uid
+            // O e-mail do perfil é sempre o da conta.
+            passageiro.email = auth.emailLogado()
+            FluxoCadastro.garantirSemPerfil(colecao().document(uid))
 
             ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid)
             passageiro.fotoUrl = arquivos.enviarImagem("fotos_perfil/$uid", foto).getOrThrow()
@@ -38,18 +36,9 @@ class PassageiroRepository @Inject constructor(
                 .set(colecao().document(uid), passageiro)
                 .commit().await()
 
-            if (contaCriadaAgora) {
-                // Conta nova só entra depois de confirmar o e-mail (ver
-                // AuthRepository.entrar) — falha no envio não desfaz o
-                // cadastro, o login reenvia.
-                auth.enviarVerificacaoEmail()
-                auth.sair()
-            } else {
-                auth.lembrarSessao(uid)
-            }
-            Result.success(Unit)
+            Result.success(FluxoCadastro.concluir(auth, conta))
         } catch (e: Exception) {
-            if (contaCriadaAgora) auth.excluirContaAtual()
+            FluxoCadastro.desfazer(auth, conta, veioDoCadastro = senha != null)
             Result.failure(e)
         }
     }

@@ -8,7 +8,7 @@ interface IMotoristaRepository {
     // Mesmo fluxo do passageiro, com os documentos: foto de perfil, foto da
     // CNH e foto do CRLV (documento do carro). Todo cadastro nasce
     // StatusMotorista.EM_ANALISE e espera a aprovação de um admin.
-    suspend fun cadastrar(motorista: Motorista, senha: String?, foto: Uri, fotoCnh: Uri, fotoCrlv: Uri): Result<Unit>
+    suspend fun cadastrar(motorista: Motorista, senha: String?, foto: Uri, fotoCnh: Uri, fotoCrlv: Uri): Result<ResultadoCadastro>
 
     suspend fun buscar(uid: String): Result<Motorista?>
 

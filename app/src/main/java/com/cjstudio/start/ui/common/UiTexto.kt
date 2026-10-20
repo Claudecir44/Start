@@ -8,6 +8,7 @@ import com.cjstudio.start.data.model.ContaBloqueadaException
 import com.cjstudio.start.data.model.CpfJaCadastradoException
 import com.cjstudio.start.data.model.EmailJaCadastradoException
 import com.cjstudio.start.data.model.EmailNaoVerificadoException
+import com.cjstudio.start.data.model.PerfilJaExisteException
 import com.cjstudio.start.data.model.PerfilNaoEncontradoException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -35,6 +36,7 @@ fun Throwable.paraUiTexto(): UiTexto = when (this) {
     is AcessoAdminRestritoException -> texto(R.string.erro_acesso_restrito_admin)
     is CpfJaCadastradoException -> texto(R.string.erro_cpf_ja_cadastrado)
     is EmailJaCadastradoException -> texto(R.string.erro_email_ja_cadastrado)
+    is PerfilJaExisteException -> texto(R.string.erro_perfil_ja_existe)
     is FirebaseAuthInvalidCredentialsException, is FirebaseAuthInvalidUserException -> texto(R.string.erro_login_invalido)
     is FirebaseNetworkException -> texto(R.string.erro_sem_internet)
     is IllegalStateException -> if (message?.contains("FirebaseApp") == true) {

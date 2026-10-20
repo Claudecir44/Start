@@ -13,7 +13,8 @@
     <string name="erro_conta_bloqueada">Sua conta está bloqueada. Fale com o suporte: cjstudiotechnology@gmail.com</string>
     <string name="erro_acesso_restrito_admin">Acesso restrito a administradores.</string>
     <string name="erro_cpf_ja_cadastrado">Já existe um cadastro com este CPF.</string>
-    <string name="erro_email_ja_cadastrado">Este e-mail já tem conta. Entre com ele na tela de login.</string>
+    <string name="erro_email_ja_cadastrado">Este e-mail já tem conta no Start (como admin, motorista ou passageiro). Para usar a mesma conta, digite a senha dela. Esqueceu? Toque em "Esqueci minha senha" no login.</string>
+    <string name="erro_perfil_ja_existe">Esta conta já tem este cadastro. Entre pela tela de login.</string>
     <string name="erro_login_invalido">E-mail ou senha incorretos.</string>
     <string name="erro_sem_internet">Sem conexão com a internet.</string>
     <string name="erro_firebase_nao_configurado">O servidor do app ainda não foi configurado.</string>

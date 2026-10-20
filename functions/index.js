@@ -66,6 +66,28 @@ function cpfValido(cpf) {
     return true;
 }
 
+// Chave web do projeto (a mesma que vai dentro do app, não é secreta).
+const WEB_API_KEY = process.env.WEB_API_KEY || '';
+
+// Confere a senha de uma conta existente pelo mesmo serviço de login que o
+// app usa (Identity Toolkit). O Admin SDK não tem como validar senha.
+async function senhaDaContaConfere(email, senha) {
+    if (!WEB_API_KEY) return false;
+    try {
+        const resposta = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${WEB_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: senha, returnSecureToken: false }),
+            }
+        );
+        return resposta.ok;
+    } catch (e) {
+        return false;
+    }
+}
+
 async function registrarLog(acao, uidAutor, detalhes) {
     try {
         await admin.firestore().collection('logsAdministracao').add({
@@ -133,11 +155,23 @@ exports.cadastrarAdmin = onCall(async (request) => {
             emailVerified: true,
         })).uid;
     } catch (error) {
-        if (error.code === 'auth/email-already-exists') {
-            throw new HttpsError('already-exists', 'Este e-mail já tem conta no Start. Use outro e-mail para o administrador.');
+        if (error.code !== 'auth/email-already-exists') {
+            console.error('Erro ao criar conta de admin:', error);
+            throw new HttpsError('internal', 'Erro ao criar a conta: ' + (error.message || error.code));
         }
-        console.error('Erro ao criar conta de admin:', error);
-        throw new HttpsError('internal', 'Erro ao criar a conta: ' + (error.message || error.code));
+        // Uma pessoa = uma conta pra tudo: quem já é motorista/passageiro
+        // pode virar admin com a MESMA conta, desde que digite a senha dela
+        // (nunca trocamos a senha de uma conta existente aqui).
+        if (!(await senhaDaContaConfere(email, senha))) {
+            throw new HttpsError('already-exists',
+                'Este e-mail já tem conta no Start (motorista ou passageiro). Para usar a mesma conta, digite a senha dela.');
+        }
+        uid = (await admin.auth().getUserByEmail(email)).uid;
+        if ((await db.collection('admins').doc(uid).get()).exists) {
+            throw new HttpsError('already-exists', 'Esta conta já é administradora.');
+        }
+        // Quem autorizou foi o master: a conta passa a valer como confirmada.
+        await admin.auth().updateUser(uid, { emailVerified: true });
     }
 
     await db.collection('admins').doc(uid).set({
