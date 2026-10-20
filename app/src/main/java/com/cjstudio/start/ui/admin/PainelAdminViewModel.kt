@@ -77,6 +77,8 @@ class PainelAdminViewModel @Inject constructor(
         data class Mensagem(val texto: UiTexto) : Evento
         // Toque num passageiro: confirmar bloqueio/desbloqueio.
         data class ConfirmarBloqueio(val passageiro: Passageiro) : Evento
+        // Toque numa corrida: detalhes e o descritivo do valor.
+        data class MostrarCorrida(val corrida: Corrida) : Evento
     }
 
     private val _estado = MutableStateFlow(Estado())
@@ -86,6 +88,7 @@ class PainelAdminViewModel @Inject constructor(
     val eventos: Flow<Evento> = _eventos.receiveAsFlow()
 
     private var cacheMotoristas: List<Motorista> = emptyList()
+    private var cacheCorridas: List<Corrida> = emptyList()
     private var cachePassageiros: List<Passageiro> = emptyList()
 
     init {
@@ -130,7 +133,10 @@ class PainelAdminViewModel @Inject constructor(
                     lista.map { it.paraItem() }
                 }
                 Secao.ADMINISTRADORES -> admins.listarTodos().map { lista -> lista.map { it.paraItem() } }
-                Secao.CORRIDAS -> corridas.listarTodas().map { lista -> lista.map { it.paraItem() } }
+                Secao.CORRIDAS -> corridas.listarTodas().map { lista ->
+                    cacheCorridas = lista
+                    lista.map { it.paraItem() }
+                }
                 Secao.TARIFAS -> tarifas.buscar().map { t ->
                     _estado.update { it.copy(tarifa = t) }
                     emptyList()
@@ -170,21 +176,49 @@ class PainelAdminViewModel @Inject constructor(
         }
     }
 
-    // Valores digitados no formato brasileiro ("4,50"). Todos precisam ser > 0.
-    fun salvarTarifa(bandeirada: String, porKm: String, porMinuto: String, minimo: String, raioKm: String) {
-        val numeros = listOf(bandeirada, porKm, porMinuto, minimo, raioKm).map { it.trim().replace(",", ".").toDoubleOrNull() }
-        if (numeros.any { it == null || it <= 0.0 }) {
+    // Campos da seção Tarifas como digitados ("4,50"; percentuais em %, "15").
+    data class FormTarifa(
+        val minimoMotorista: String,
+        val kmFaixa: String,
+        val bandeirada: String,
+        val porKm: String,
+        val porMinuto: String,
+        val taxaPlataformaPct: String,
+        val quartoPassageiroPct: String,
+        val porParada: String,
+        val raioKm: String
+    )
+
+    // Mínimo, faixa e raio precisam ser > 0; os demais podem ser 0.
+    fun salvarTarifa(form: FormTarifa) {
+        fun n(v: String) = v.trim().replace(",", ".").toDoubleOrNull()
+        val positivos = listOf(n(form.minimoMotorista), n(form.kmFaixa), n(form.raioKm))
+        val livres = listOf(n(form.bandeirada), n(form.porKm), n(form.porMinuto), n(form.taxaPlataformaPct), n(form.quartoPassageiroPct), n(form.porParada))
+        if (positivos.any { it == null || it <= 0.0 } || livres.any { it == null || it < 0.0 }) {
             _eventos.trySend(Evento.Mensagem(texto(R.string.tarifa_erro_valores)))
             return
         }
-        val (b, km, min, minimoValor, raio) = numeros.map { it!! }
-        val nova = Tarifa(bandeirada = b, porKm = km, porMinuto = min, minimo = minimoValor, raioBuscaKm = raio)
+        val nova = Tarifa(
+            bandeirada = n(form.bandeirada)!!,
+            porKm = n(form.porKm)!!,
+            porMinuto = n(form.porMinuto)!!,
+            valorMinimoMotorista = n(form.minimoMotorista)!!,
+            kmFaixaMinima = n(form.kmFaixa)!!,
+            taxaPlataforma = n(form.taxaPlataformaPct)!! / 100,
+            acrescimoQuartoPassageiro = n(form.quartoPassageiroPct)!! / 100,
+            valorPorParada = n(form.porParada)!!,
+            raioBuscaKm = n(form.raioKm)!!
+        )
         _estado.update { it.copy(salvandoTarifa = true) }
         viewModelScope.launch {
             val resultado = tarifas.salvar(nova)
             _estado.update { it.copy(salvandoTarifa = false, tarifa = if (resultado.isSuccess) nova else it.tarifa) }
             _eventos.send(Evento.Mensagem(resultado.fold({ texto(R.string.tarifa_salva) }, { it.paraUiTexto() })))
         }
+    }
+
+    fun tocouCorrida(id: String) {
+        cacheCorridas.firstOrNull { it.id == id }?.let { _eventos.trySend(Evento.MostrarCorrida(it)) }
     }
 
     fun trocarMinhaFoto(uri: android.net.Uri) {

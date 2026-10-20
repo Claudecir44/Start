@@ -2,7 +2,9 @@ package com.cjstudio.start.ui.motorista
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cjstudio.start.data.model.CalculoCorrida
 import com.cjstudio.start.data.model.Corrida
+import com.cjstudio.start.domain.CalculadoraTarifa
 import com.cjstudio.start.data.model.Local
 import com.cjstudio.start.data.model.Motorista
 import com.cjstudio.start.data.model.Tarifa
@@ -10,6 +12,7 @@ import com.cjstudio.start.data.repository.IAuthRepository
 import com.cjstudio.start.data.repository.ICorridaRepository
 import com.cjstudio.start.data.repository.IFalhasRepository
 import com.cjstudio.start.data.repository.ILocalizacaoRepository
+import com.cjstudio.start.data.repository.INotificacaoRepository
 import com.cjstudio.start.data.repository.IMotoristaRepository
 import com.cjstudio.start.data.repository.ITarifaRepository
 import com.cjstudio.start.ui.common.UiTexto
@@ -28,7 +31,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -37,7 +39,7 @@ import javax.inject.Inject
 // Tela inicial do motorista. Online e aprovado (com a tela aberta): envia a
 // posição e mostra a corrida esperando motorista mais perto dele (dentro do
 // raio da tarifa). Aceitar passa pelo servidor; quando ele grava
-// corridaAtualId no perfil, a tela da corrida abre.
+// corridaAtualId no perfil, a corrida aparece na mesma tela (CorridaViewModel).
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeMotoristaViewModel @Inject constructor(
@@ -45,18 +47,19 @@ class HomeMotoristaViewModel @Inject constructor(
     private val motoristas: IMotoristaRepository,
     private val corridas: ICorridaRepository,
     private val localizacao: ILocalizacaoRepository,
+    private val notificacoes: INotificacaoRepository,
     private val tarifas: ITarifaRepository,
     private val falhas: IFalhasRepository
 ) : ViewModel() {
 
     sealed interface Evento {
         data object Saiu : Evento
-        data class AbrirCorrida(val corridaId: String) : Evento
         data class Mensagem(val texto: UiTexto) : Evento
     }
 
-    // Corrida oferecida + distância até a partida (linha reta).
-    data class Oferta(val corrida: Corrida, val metrosAtePartida: Double)
+    // Corrida oferecida + distância até a partida (linha reta) + prévia do
+    // valor com o deslocamento estimado (o valor final sai no aceite).
+    data class Oferta(val corrida: Corrida, val metrosAtePartida: Double, val previa: CalculoCorrida)
 
     val motorista: StateFlow<Motorista?> = motoristas.escutarLogado()
         .catch { emit(null) }
@@ -87,28 +90,17 @@ class HomeMotoristaViewModel @Inject constructor(
             val uid = auth.uidLogado()
             disponiveis.asSequence()
                 .filter { it.id !in recusadasAgora && it.passageiroId != uid }
-                .mapNotNull { c -> c.origem?.let { Oferta(c, MapaUtil.distanciaMetros(aqui, it)) } }
+                .mapNotNull { c -> c.origem?.let { ofertaDe(c, MapaUtil.distanciaMetros(aqui, it)) } }
                 .filter { it.metrosAtePartida <= tarifa.raioBuscaKm * 1000 }
                 .minByOrNull { it.metrosAtePartida }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    private var corridaAberta: String? = null
-
     init {
         falhas.definirUsuario(auth.uidLogado())
+        // Token de push no perfil (avisos de corrida).
+        viewModelScope.launch { notificacoes.registrarToken() }
         viewModelScope.launch { tarifas.buscar().onSuccess { tarifa = it } }
-        // Abre a corrida aceita (ou que já estava em andamento).
-        viewModelScope.launch {
-            motorista.map { it?.corridaAtualId }.distinctUntilChanged().collect { id ->
-                if (id != null && id != corridaAberta) {
-                    corridaAberta = id
-                    _eventos.send(Evento.AbrirCorrida(id))
-                } else if (id == null) {
-                    corridaAberta = null
-                }
-            }
-        }
         // Posição: a cada 10 s enquanto recebendo corridas.
         viewModelScope.launch {
             recebendo.flatMapLatest { ativo ->
@@ -118,6 +110,14 @@ class HomeMotoristaViewModel @Inject constructor(
                 motoristas.atualizarLocalizacao(local)
             }
         }
+    }
+
+    private fun ofertaDe(c: Corrida, metrosAtePartida: Double): Oferta {
+        val (deslocMetros, deslocSegundos) = CalculadoraTarifa.estimarDeslocamento(metrosAtePartida)
+        val previa = CalculadoraTarifa.calcular(
+            tarifa, deslocMetros, deslocSegundos, c.distanciaMetros, c.duracaoSegundos, c.quartoPassageiro, paradas = 0
+        )
+        return Oferta(c, metrosAtePartida, previa)
     }
 
     fun telaVisivel(visivel: Boolean) {

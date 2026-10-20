@@ -8,16 +8,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.cjstudio.start.R
+import com.cjstudio.start.data.model.Corrida
 import com.cjstudio.start.databinding.ActivityHomePassageiroBinding
 import com.cjstudio.start.ui.common.Navegacao
 import com.cjstudio.start.ui.common.coletar
 import com.cjstudio.start.ui.common.lerLocal
 import com.cjstudio.start.ui.common.mostrarMensagem
 import com.cjstudio.start.ui.common.pedirLocalizacao
+import com.cjstudio.start.ui.common.pedirNotificacaoSeNecessario
 import com.cjstudio.start.ui.common.registrarPermissaoLocalizacao
+import com.cjstudio.start.ui.common.registrarPermissaoNotificacao
 import com.cjstudio.start.ui.common.temPermissaoLocalizacao
-import com.cjstudio.start.ui.corrida.CorridaBaseActivity
-import com.cjstudio.start.ui.corrida.CorridaPassageiroActivity
+import com.cjstudio.start.ui.corrida.CorridaViewModel
+import com.cjstudio.start.ui.corrida.PainelCorrida
 import com.cjstudio.start.ui.passageiro.HomePassageiroViewModel.Painel
 import com.cjstudio.start.util.MapaUtil
 import com.cjstudio.start.util.MapaUtil.latLng
@@ -27,12 +30,19 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import dagger.hilt.android.AndroidEntryPoint
 
+// Tudo do passageiro numa tela só: pedido (Para onde vamos? → estimativa →
+// Pedir) e, depois, a corrida em andamento — no mesmo mapa entre as linhas
+// e no mesmo espaço de baixo (PainelCorrida).
 @AndroidEntryPoint
 class HomePassageiroActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomePassageiroBinding
     private val viewModel: HomePassageiroViewModel by viewModels()
+    private val corridaViewModel: CorridaViewModel by viewModels()
+    private lateinit var painelCorrida: PainelCorrida
     private var mapa: GoogleMap? = null
+
+    private val permissaoNotificacao = registrarPermissaoNotificacao()
 
     private val permissao = registrarPermissaoLocalizacao { concedida ->
         if (concedida) {
@@ -48,10 +58,23 @@ class HomePassageiroActivity : AppCompatActivity() {
         if (r.resultCode == RESULT_OK && partida != null && destino != null) viewModel.definirRota(partida, destino)
     }
 
+    // Parada extra durante a corrida (mesma busca de endereço, só o destino).
+    private val escolherParada = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
+        val parada = r.data?.lerLocal("destino")
+        if (r.resultCode == RESULT_OK && parada != null) corridaViewModel.adicionarParada(parada)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomePassageiroBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        pedirNotificacaoSeNecessario(permissaoNotificacao)
+
+        painelCorrida = PainelCorrida(this, binding.painelCorrida, corridaViewModel) {
+            escolherParada.launch(
+                Intent(this, EscolherDestinoActivity::class.java).putExtra(EscolherDestinoActivity.EXTRA_MODO_PARADA, true)
+            )
+        }
 
         val abrirPerfil = View.OnClickListener { startActivity(Intent(this, EditarPassageiroActivity::class.java)) }
         binding.cabecalho.ivFoto.setOnClickListener(abrirPerfil)
@@ -59,6 +82,9 @@ class HomePassageiroActivity : AppCompatActivity() {
         binding.cabecalho.btnSair.setOnClickListener { viewModel.sair() }
         binding.cardParaOnde.setOnClickListener { escolherDestino.launch(Intent(this, EscolherDestinoActivity::class.java)) }
         binding.btnPedir.setOnClickListener { viewModel.pedir() }
+        binding.cbQuartoPassageiro.setOnCheckedChangeListener { botao, marcado ->
+            if (botao.isPressed) viewModel.alternarQuartoPassageiro(marcado)
+        }
         binding.tvTrocarDestino.setOnClickListener {
             viewModel.limpar()
             escolherDestino.launch(Intent(this, EscolherDestinoActivity::class.java))
@@ -69,7 +95,7 @@ class HomePassageiroActivity : AppCompatActivity() {
             MapaUtil.configurar(this, m)
             ativarMinhaLocalizacao()
             viewModel.aqui.value?.let { m.moveCamera(CameraUpdateFactory.newLatLngZoom(it.latLng(), 15f)) }
-            desenhar(viewModel.painel.value)
+            atualizarMapa()
         }
         if (temPermissaoLocalizacao()) viewModel.atualizarLocalizacao() else permissao.pedirLocalizacao()
 
@@ -77,35 +103,23 @@ class HomePassageiroActivity : AppCompatActivity() {
             if (p == null) return@coletar
             binding.cabecalho.tvOla.text = getString(R.string.home_ola, p.nomeCompleto.orEmpty().substringBefore(" "))
             binding.cabecalho.ivFoto.carregarFotoRedonda(p.fotoUrl)
+            corridaViewModel.acompanhar(p.corridaAtualId)
         }
         coletar(viewModel.aqui) { local ->
-            if (local != null && viewModel.painel.value is Painel.Inicial) {
+            if (local != null && viewModel.painel.value is Painel.Inicial && corridaViewModel.corrida.value == null) {
                 mapa?.animateCamera(CameraUpdateFactory.newLatLngZoom(local.latLng(), 15f))
             }
         }
-        coletar(viewModel.painel) { mostrar(it) }
+        coletar(viewModel.painel) { mostrarPedido(it) }
+        coletar(corridaViewModel.corrida) { mostrarCorrida(it) }
+        coletar(corridaViewModel.enviando) { painelCorrida.habilitar(!it) }
+        coletar(corridaViewModel.mensagens) { mostrarMensagem(it) }
         coletar(viewModel.eventos) { evento ->
             when (evento) {
                 HomePassageiroViewModel.Evento.Saiu -> Navegacao.irLimpando(this, Navegacao.telaLogin())
-                is HomePassageiroViewModel.Evento.AbrirCorrida -> abrirCorrida(evento.corridaId)
                 is HomePassageiroViewModel.Evento.Mensagem -> mostrarMensagem(evento.texto)
             }
         }
-    }
-
-    // Voltou pra cá com a corrida ainda em andamento (ex.: botão Voltar):
-    // reabre a corrida em vez de deixar pedir outra.
-    override fun onResume() {
-        super.onResume()
-        viewModel.passageiro.value?.corridaAtualId?.let { abrirCorrida(it) }
-    }
-
-    private fun abrirCorrida(corridaId: String) {
-        startActivity(
-            Intent(this, CorridaPassageiroActivity::class.java)
-                .putExtra(CorridaBaseActivity.EXTRA_CORRIDA, corridaId)
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        )
     }
 
     @SuppressLint("MissingPermission")
@@ -113,7 +127,15 @@ class HomePassageiroActivity : AppCompatActivity() {
         if (temPermissaoLocalizacao()) mapa?.isMyLocationEnabled = true
     }
 
-    private fun mostrar(painel: Painel) {
+    // Com corrida, o espaço de baixo é dela; sem corrida, do pedido.
+    private fun mostrarCorrida(corrida: Corrida?) {
+        binding.painelCorrida.root.visibility = if (corrida != null) View.VISIBLE else View.GONE
+        binding.painelPedido.visibility = if (corrida != null) View.GONE else View.VISIBLE
+        if (corrida != null) painelCorrida.mostrar(corrida) else painelCorrida.limparDesenho()
+        atualizarMapa()
+    }
+
+    private fun mostrarPedido(painel: Painel) {
         val estimativa = when (painel) {
             is Painel.Estimativa -> painel
             is Painel.Pedindo -> painel.anterior
@@ -123,6 +145,7 @@ class HomePassageiroActivity : AppCompatActivity() {
         binding.painelEstimativa.visibility = if (estimativa != null) View.VISIBLE else View.GONE
         binding.progressBar.visibility = if (painel is Painel.Estimando || painel is Painel.Pedindo) View.VISIBLE else View.GONE
         binding.btnPedir.isEnabled = painel is Painel.Estimativa
+        binding.cbQuartoPassageiro.isEnabled = painel is Painel.Estimativa
         binding.btnPedir.setText(if (painel is Painel.Pedindo) R.string.corrida_pedindo else R.string.corrida_pedir)
         if (estimativa != null) {
             val e = estimativa.estimativa
@@ -130,18 +153,27 @@ class HomePassageiroActivity : AppCompatActivity() {
             binding.tvRotaDestino.text = estimativa.destino.endereco
             binding.tvRotaResumo.text = getString(R.string.corrida_resumo, MapaUtil.distancia(e.distanciaMetros), MapaUtil.duracao(e.duracaoSegundos))
             binding.tvValor.text = MapaUtil.valor(e.valor)
+            binding.cbQuartoPassageiro.isChecked = e.quartoPassageiro
+        } else if (painel is Painel.Inicial) {
+            binding.cbQuartoPassageiro.isChecked = false
         }
-        desenhar(painel)
+        atualizarMapa()
     }
 
-    // Mapa limpo no início; com estimativa, rota + partida/destino enquadrados.
-    private fun desenhar(painel: Painel) {
+    // Um mapa só: a corrida desenha quando existe; senão, a estimativa.
+    private fun atualizarMapa() {
         val m = mapa ?: return
+        val folga = resources.getDimensionPixelSize(R.dimen.folga_enquadrar)
+        corridaViewModel.corrida.value?.let {
+            painelCorrida.desenhar(m, it, folga)
+            return
+        }
         m.clear()
+        val painel = viewModel.painel.value
         val est = (painel as? Painel.Estimativa) ?: (painel as? Painel.Pedindo)?.anterior ?: return
         MapaUtil.desenharRota(this, m, est.estimativa.polyline)
         MapaUtil.marcadorPartida(m, est.partida)
         MapaUtil.marcadorDestino(m, est.destino)
-        MapaUtil.enquadrar(m, listOf(est.partida, est.destino), resources.getDimensionPixelSize(R.dimen.folga_enquadrar))
+        MapaUtil.enquadrar(m, listOf(est.partida, est.destino), folga)
     }
 }

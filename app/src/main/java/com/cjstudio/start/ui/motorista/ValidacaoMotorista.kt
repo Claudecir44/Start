@@ -9,7 +9,11 @@ import java.util.Calendar
 // Regras dos dados de motorista, iguais no cadastro e na edição.
 object ValidacaoMotorista {
     const val IDADE_MINIMA = 21
-    const val IDADE_MAXIMA_VEICULO = 15
+    // Carro com no máximo 10 anos de uso.
+    const val IDADE_MAXIMA_VEICULO = 10
+
+    const val TIPO_HATCH = "hatch"
+    const val TIPO_SEDAN = "sedan"
 
     // Categorias da CNH que permitem dirigir carro de passeio.
     val CATEGORIAS_CNH = listOf("B", "AB", "C", "AC", "D", "AD", "E", "AE")
@@ -25,7 +29,10 @@ object ValidacaoMotorista {
         val modelo: String,
         val ano: String,
         val cor: String,
-        val placa: String
+        val placa: String,
+        val tipoVeiculo: String?,
+        val quatroPortas: Boolean,
+        val arCondicionado: Boolean
     )
 
     // Primeira regra quebrada (null = tudo certo). Fotos são conferidas por
@@ -47,6 +54,9 @@ object ValidacaoMotorista {
             ano == null || ano > anoAtual + 1 -> texto(R.string.motorista_erro_ano)
             ano < anoAtual - IDADE_MAXIMA_VEICULO -> texto(R.string.motorista_erro_ano_antigo, anoAtual - IDADE_MAXIMA_VEICULO)
             !Validacao.placa(d.placa) -> texto(R.string.motorista_erro_placa)
+            d.tipoVeiculo !in setOf(TIPO_HATCH, TIPO_SEDAN) -> texto(R.string.veiculo_erro_tipo)
+            !d.quatroPortas -> texto(R.string.veiculo_erro_portas)
+            !d.arCondicionado -> texto(R.string.veiculo_erro_ar)
             !temFotoCrlv -> texto(R.string.motorista_erro_foto_crlv)
             else -> null
         }

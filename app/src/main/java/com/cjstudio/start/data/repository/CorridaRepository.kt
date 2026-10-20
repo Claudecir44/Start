@@ -36,19 +36,31 @@ class CorridaRepository @Inject constructor(
 
     private fun Local.paraMapa() = mapOf("endereco" to endereco, "lat" to lat, "lng" to lng)
 
-    override suspend fun estimar(origem: Local, destino: Local): Result<EstimativaCorrida> = runCatching {
-        val r = chamar("estimarCorrida", mapOf("origem" to origem.paraMapa(), "destino" to destino.paraMapa()))
+    override suspend fun estimar(origem: Local, destino: Local, quartoPassageiro: Boolean): Result<EstimativaCorrida> = runCatching {
+        val r = chamar(
+            "estimarCorrida",
+            mapOf("origem" to origem.paraMapa(), "destino" to destino.paraMapa(), "quartoPassageiro" to quartoPassageiro)
+        )
         EstimativaCorrida(
             distanciaMetros = (r["distanciaMetros"] as Number).toLong(),
             duracaoSegundos = (r["duracaoSegundos"] as Number).toLong(),
             polyline = r["polyline"] as? String ?: "",
-            valor = (r["valor"] as Number).toDouble()
+            valor = (r["valor"] as Number).toDouble(),
+            quartoPassageiro = quartoPassageiro
         )
     }
 
-    override suspend fun pedir(origem: Local, destino: Local): Result<String> = runCatching {
-        val r = chamar("pedirCorrida", mapOf("origem" to origem.paraMapa(), "destino" to destino.paraMapa()))
+    override suspend fun pedir(origem: Local, destino: Local, quartoPassageiro: Boolean): Result<String> = runCatching {
+        val r = chamar(
+            "pedirCorrida",
+            mapOf("origem" to origem.paraMapa(), "destino" to destino.paraMapa(), "quartoPassageiro" to quartoPassageiro)
+        )
         r["corridaId"] as String
+    }
+
+    override suspend fun adicionarParada(corridaId: String, parada: Local): Result<Unit> = runCatching {
+        chamar("adicionarParada", mapOf("corridaId" to corridaId, "parada" to parada.paraMapa()))
+        Unit
     }
 
     override suspend fun aceitar(corridaId: String): Result<Unit> = runCatching {

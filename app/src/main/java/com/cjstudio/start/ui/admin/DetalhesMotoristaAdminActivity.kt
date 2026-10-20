@@ -68,7 +68,14 @@ class DetalhesMotoristaAdminActivity : AppCompatActivity() {
         val v = m.veiculo
         binding.tvVeiculo.text = getString(
             R.string.admin_detalhe_veiculo,
-            v?.marca.orEmpty(), v?.modelo.orEmpty(), v?.ano?.toString().orEmpty(), v?.cor.orEmpty(), v?.placa.orEmpty()
+            v?.marca.orEmpty(), v?.modelo.orEmpty(), v?.ano?.toString().orEmpty(), v?.cor.orEmpty(), v?.placa.orEmpty(),
+            when (v?.tipo) {
+                "hatch" -> getString(R.string.veiculo_hatch)
+                "sedan" -> getString(R.string.veiculo_sedan)
+                else -> "?"
+            },
+            getString(if (v?.quatroPortas == true) R.string.sim else R.string.nao),
+            getString(if (v?.arCondicionado == true) R.string.sim else R.string.nao)
         )
         mostrarDocumento(binding.ivCnh, m.cnhFotoUrl)
         mostrarDocumento(binding.ivCrlv, m.crlvFotoUrl)

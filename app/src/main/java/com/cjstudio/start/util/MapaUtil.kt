@@ -67,6 +67,11 @@ object MapaUtil {
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
     )
 
+    fun marcadorParada(mapa: GoogleMap, local: Local): Marker? = mapa.addMarker(
+        MarkerOptions().position(local.latLng()).title(local.endereco)
+            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))
+    )
+
     fun marcadorCarro(mapa: GoogleMap, local: Local): Marker? = mapa.addMarker(
         MarkerOptions().position(local.latLng())
             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
@@ -93,12 +98,6 @@ object MapaUtil {
         runCatching { mapa.animateCamera(CameraUpdateFactory.newLatLngBounds(limites, folgaPx)) }
     }
 
-    // Abre a navegação no Google Maps (ou Waze/outro app de mapa instalado).
-    fun abrirNavegacao(context: Context, destino: Local) {
-        val google = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=${destino.lat},${destino.lng}"))
-        val qualquer = Intent(Intent.ACTION_VIEW, Uri.parse("geo:${destino.lat},${destino.lng}?q=${destino.lat},${destino.lng}"))
-        runCatching { context.startActivity(google) }.onFailure { runCatching { context.startActivity(qualquer) } }
-    }
 
     fun ligar(context: Context, telefone: String?) {
         val numero = telefone?.filter { it.isDigit() }.orEmpty()

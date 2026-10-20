@@ -75,6 +75,17 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvOfertaQuarto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/oferta_quarto_passageiro"
+                android:textColor="@color/laranja"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/tvOfertaResumo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -120,8 +131,17 @@
 
     <View style="@style/LinhaDivisoria" />
 
+    <!-- Corrida em andamento (no lugar do botão online). Ver PainelCorrida.kt. -->
+    <include
+        android:id="@+id/painelCorrida"
+        layout="@layout/include_painel_corrida"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <!-- Botão pequeno (metade da largura) no canto inferior direito. -->
     <FrameLayout
+        android:id="@+id/rodapeOnline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="16dp"

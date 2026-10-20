@@ -9,7 +9,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cjstudio.start.R
+import com.cjstudio.start.data.model.Corrida
 import com.cjstudio.start.data.model.Passageiro
+import com.cjstudio.start.ui.corrida.DescritivoCorrida
 import com.cjstudio.start.data.model.Tarifa
 import java.util.Locale
 import com.cjstudio.start.databinding.ActivityPainelAdminBinding
@@ -63,11 +65,17 @@ class PainelAdminActivity : AppCompatActivity() {
         binding.btnTarifas.setOnClickListener { viewModel.abrir(Secao.TARIFAS) }
         binding.btnSalvarTarifa.setOnClickListener {
             viewModel.salvarTarifa(
-                binding.etBandeirada.text.toString(),
-                binding.etPorKm.text.toString(),
-                binding.etPorMinuto.text.toString(),
-                binding.etMinimo.text.toString(),
-                binding.etRaio.text.toString()
+                PainelAdminViewModel.FormTarifa(
+                    minimoMotorista = binding.etMinimoMotorista.text.toString(),
+                    kmFaixa = binding.etKmFaixa.text.toString(),
+                    bandeirada = binding.etBandeirada.text.toString(),
+                    porKm = binding.etPorKm.text.toString(),
+                    porMinuto = binding.etPorMinuto.text.toString(),
+                    taxaPlataformaPct = binding.etTaxaPlataforma.text.toString(),
+                    quartoPassageiroPct = binding.etQuartoPassageiro.text.toString(),
+                    porParada = binding.etPorParada.text.toString(),
+                    raioKm = binding.etRaio.text.toString()
+                )
             )
         }
         binding.btnNovoAdmin.setOnClickListener { startActivity(Intent(this, CadastroAdminActivity::class.java)) }
@@ -81,6 +89,7 @@ class PainelAdminActivity : AppCompatActivity() {
                 PainelAdminViewModel.Evento.Saiu -> Navegacao.irLimpando(this, Navegacao.telaLogin())
                 is PainelAdminViewModel.Evento.Mensagem -> mostrarMensagem(evento.texto)
                 is PainelAdminViewModel.Evento.ConfirmarBloqueio -> confirmarBloqueio(evento.passageiro)
+                is PainelAdminViewModel.Evento.MostrarCorrida -> mostrarCorrida(evento.corrida)
             }
         }
     }
@@ -147,8 +156,26 @@ class PainelAdminActivity : AppCompatActivity() {
                 Intent(this, DetalhesMotoristaAdminActivity::class.java).putExtra(DetalhesMotoristaAdminActivity.EXTRA_UID, item.id)
             )
             Secao.PASSAGEIROS -> viewModel.tocouPassageiro(item.id)
+            Secao.CORRIDAS -> viewModel.tocouCorrida(item.id)
             else -> Unit
         }
+    }
+
+    // Corrida: endereços, pessoas e o descritivo de como o valor foi calculado.
+    private fun mostrarCorrida(c: Corrida) {
+        val linhas = mutableListOf<String>()
+        linhas += getString(R.string.admin_corrida_partida, c.origem?.endereco.orEmpty())
+        c.paradas.forEachIndexed { i, p -> linhas += getString(R.string.corrida_parada_n, i + 1, p.endereco.orEmpty()) }
+        linhas += getString(R.string.admin_corrida_destino, c.destino?.endereco.orEmpty())
+        linhas += getString(R.string.admin_corrida_pessoas, c.passageiroNome.orEmpty(), c.motoristaNome ?: "—")
+        if (c.quartoPassageiro) linhas += getString(R.string.corrida_quatro_passageiros)
+        linhas += ""
+        c.calculo?.let { linhas += DescritivoCorrida.texto(this, it, paraMotorista = false) }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.admin_corrida_detalhe)
+            .setMessage(linhas.joinToString("\n"))
+            .setPositiveButton(R.string.ok, null)
+            .show()
     }
 
     private fun confirmarBloqueio(passageiro: Passageiro) {
@@ -172,10 +199,14 @@ class PainelAdminActivity : AppCompatActivity() {
         if (t == tarifaMostrada) return
         tarifaMostrada = t
         fun num(v: Double) = String.format(Locale("pt", "BR"), "%.2f", v)
+        binding.etMinimoMotorista.setText(num(t.valorMinimoMotorista))
+        binding.etKmFaixa.setText(num(t.kmFaixaMinima))
         binding.etBandeirada.setText(num(t.bandeirada))
         binding.etPorKm.setText(num(t.porKm))
         binding.etPorMinuto.setText(num(t.porMinuto))
-        binding.etMinimo.setText(num(t.minimo))
+        binding.etTaxaPlataforma.setText(num(t.taxaPlataforma * 100))
+        binding.etQuartoPassageiro.setText(num(t.acrescimoQuartoPassageiro * 100))
+        binding.etPorParada.setText(num(t.valorPorParada))
         binding.etRaio.setText(num(t.raioBuscaKm))
     }
 

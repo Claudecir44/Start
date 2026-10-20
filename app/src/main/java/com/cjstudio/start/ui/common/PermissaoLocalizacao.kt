@@ -21,3 +21,13 @@ fun ActivityResultLauncher<Array<String>>.pedirLocalizacao() =
 fun Context.temPermissaoLocalizacao(): Boolean =
     ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+// Android 13+: avisos de corrida precisam da permissão de notificação.
+fun AppCompatActivity.pedirNotificacaoSeNecessario(lancador: ActivityResultLauncher<String>) {
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
+    lancador.launch(Manifest.permission.POST_NOTIFICATIONS)
+}
+
+fun AppCompatActivity.registrarPermissaoNotificacao(): ActivityResultLauncher<String> =
+    registerForActivityResult(ActivityResultContracts.RequestPermission()) { }

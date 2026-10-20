@@ -54,7 +54,7 @@
     <string name="sexo_homem">Homem</string>
     <string name="sexo_mulher">Mulher</string>
     <string name="sexo_nao_informado">Não informado</string>
-    <string name="cadastro_termos">Li e aceito os <u>Termos de Uso e a Política de Privacidade</u></string>
+    <string name="cadastro_termos">Li e aceito os <u>Termos de Uso, as Regras e a Política de Privacidade</u></string>
     <string name="cadastro_botao">Criar conta</string>
     <string name="cadastro_enviando">Enviando…</string>
     <string name="cadastro_erro_foto">Escolha uma foto sua (rosto visível).</string>
@@ -94,6 +94,14 @@
     <string name="motorista_erro_ano">Ano do carro inválido.</string>
     <string name="motorista_erro_ano_antigo">O carro precisa ser do ano %1$d ou mais novo.</string>
     <string name="motorista_erro_placa">Placa inválida (ex.: ABC1D23 ou ABC1234).</string>
+    <string name="veiculo_requisitos">O carro precisa ter no máximo 10 anos de uso, ser hatch ou sedã, ter 4 portas e ar-condicionado funcionando.</string>
+    <string name="veiculo_hatch">Hatch</string>
+    <string name="veiculo_sedan">Sedã</string>
+    <string name="veiculo_quatro_portas">O carro tem 4 portas</string>
+    <string name="veiculo_ar_condicionado">O ar-condicionado está funcionando</string>
+    <string name="veiculo_erro_tipo">Escolha o tipo do carro: hatch ou sedã.</string>
+    <string name="veiculo_erro_portas">O Start aceita só carros de 4 portas.</string>
+    <string name="veiculo_erro_ar">O Start exige ar-condicionado funcionando.</string>
     <string name="motorista_erro_foto_crlv">Envie a foto do documento do carro (CRLV).</string>
 
     <!-- Telas iniciais -->
@@ -159,13 +167,11 @@ Sexo: %3$s
     <string name="corrida_p_finalizada">Você chegou!</string>
     <string name="corrida_p_finalizada_msg">Pague %1$s ao motorista (dinheiro ou Pix).</string>
     <string name="corrida_m_buscar">Buscar passageiro</string>
-    <string name="corrida_m_buscar_msg">Vá até o ponto de partida. Toque em \"Passageiro embarcou\" quando ele entrar.</string>
+    <string name="corrida_m_buscar_msg">Siga o caminho no mapa até o ponto de partida. Toque em \"Passageiro embarcou\" quando ele entrar.</string>
     <string name="corrida_m_em_viagem">Levando o passageiro</string>
-    <string name="corrida_m_em_viagem_msg">Siga até o destino e finalize a corrida ao chegar.</string>
+    <string name="corrida_m_em_viagem_msg">Siga o caminho no mapa até o destino e finalize a corrida ao chegar.</string>
     <string name="corrida_m_finalizada">Corrida finalizada</string>
     <string name="corrida_m_finalizada_msg">Receba %1$s do passageiro (dinheiro ou Pix).</string>
-    <string name="corrida_m_navegar_partida">Navegar até o passageiro</string>
-    <string name="corrida_m_navegar_destino">Navegar até o destino</string>
     <string name="corrida_m_embarcou">Passageiro embarcou</string>
     <string name="corrida_m_finalizar">Finalizar corrida</string>
     <string name="corrida_m_finalizar_msg">Finalizar e receber %1$s do passageiro (dinheiro ou Pix)?</string>
@@ -175,6 +181,39 @@ Sexo: %3$s
     <string name="oferta_aceitar">Aceitar</string>
     <string name="oferta_aceitando">Aceitando…</string>
     <string name="oferta_recusar">Recusar</string>
+
+    <string name="corrida_passageiro_quarto">Passageiro · 4 passageiros (+20%)</string>
+    <string name="corrida_quatro_passageiros">4 passageiros (+20%)</string>
+    <string name="corrida_parada_n">Parada %1$d: %2$s</string>
+    <string name="corrida_valor_a_partir">a partir de</string>
+    <string name="corrida_valor_receber">receber</string>
+    <string name="corrida_valor_pagar">a pagar</string>
+    <string name="corrida_adicionar_parada">Adicionar parada (+%1$s)</string>
+    <string name="corrida_parada_titulo">Adicionar parada</string>
+    <string name="corrida_parada_hint">Endereço da parada</string>
+    <string name="corrida_quarto_passageiro_opcao">Haverá um 4º passageiro (no banco da frente, se o motorista aceitar). Acréscimo de 20%.</string>
+    <string name="corrida_lembrete_regras">Regras: no máximo 3 passageiros no banco de trás. Proibido comer ou beber no carro. Ajude a manter o carro limpo. O valor final, com o deslocamento do motorista, aparece quando ele aceitar.</string>
+    <string name="oferta_quarto_passageiro">4 passageiros: 1 no banco da frente (+20%)</string>
+    <string name="oferta_valor_aprox">≈ %1$s</string>
+    <string name="oferta_voce_recebe">Você recebe ≈ %1$s (valor exato ao aceitar)</string>
+
+    <!-- Detalhamento do valor (DescritivoCorrida) -->
+    <string name="calc_deslocamento">Deslocamento do motorista: %1$s (%2$s)</string>
+    <string name="calc_viagem">Viagem: %1$s (%2$s)</string>
+    <string name="calc_total">Total considerado: %1$s (%2$s)</string>
+    <string name="calc_regra_minimo">Até %1$s no total: valor mínimo do motorista %2$s</string>
+    <string name="calc_regra_tarifa">Tarifa: bandeirada %1$s + %2$s/km + %3$s/min = %4$s</string>
+    <string name="calc_quarto">4º passageiro (+%1$s): %2$s</string>
+    <string name="calc_paradas">Paradas extras: %1$d × %2$s = %3$s</string>
+    <string name="calc_motorista">Valor do motorista: %1$s</string>
+    <string name="calc_plataforma">Taxa da plataforma (%1$s): %2$s</string>
+    <string name="calc_total_pago">Total pago pelo passageiro: %1$s</string>
+    <string name="calc_repasse">Você recebe %1$s do passageiro: %2$s são seus e %3$s são da plataforma (a repassar).</string>
+
+    <!-- Notificações -->
+    <string name="canal_corridas">Novas corridas</string>
+    <string name="canal_corridas_descricao">Aviso de corrida perto de você para aceitar</string>
+    <string name="canal_avisos">Avisos da corrida</string>
 
     <!-- Admin -->
     <string name="admin_cadastrar">Cadastrar administrador</string>
@@ -202,11 +241,19 @@ Sexo: %3$s
     <string name="situacao_corrida_em_andamento">Em viagem</string>
     <string name="situacao_corrida_finalizada">Finalizada</string>
     <string name="situacao_corrida_cancelada">Cancelada</string>
-    <string name="tarifa_explicacao">Preço da corrida = bandeirada + (km × preço por km) + (minutos × preço por minuto), nunca abaixo do mínimo. O valor é arredondado para cima nos 50 centavos. Vale para as próximas corridas.</string>
+    <string name="tarifa_explicacao">Distância e tempo TOTAIS = deslocamento do motorista até o passageiro + viagem. Até a faixa mínima, o motorista recebe o valor mínimo; acima dela, bandeirada + km + minuto (nunca abaixo do mínimo). Depois: + acréscimo do 4º passageiro, + paradas extras e, por cima de tudo, a taxa da plataforma — esse é o valor que o passageiro paga. Vale para as próximas corridas.</string>
+    <string name="tarifa_minimo_motorista">Valor mínimo do motorista (R$)</string>
+    <string name="tarifa_km_faixa">Faixa do valor mínimo (km totais)</string>
+    <string name="tarifa_taxa_plataforma">Taxa da plataforma (%)</string>
+    <string name="tarifa_quarto_passageiro">Acréscimo do 4º passageiro (%)</string>
+    <string name="tarifa_por_parada">Valor por parada extra (R$)</string>
+    <string name="admin_corrida_detalhe">Detalhes da corrida</string>
+    <string name="admin_corrida_partida">Partida: %1$s</string>
+    <string name="admin_corrida_destino">Destino: %1$s</string>
+    <string name="admin_corrida_pessoas">Passageiro: %1$s · Motorista: %2$s</string>
     <string name="tarifa_bandeirada">Bandeirada (R$)</string>
     <string name="tarifa_por_km">Preço por km (R$)</string>
     <string name="tarifa_por_minuto">Preço por minuto (R$)</string>
-    <string name="tarifa_minimo">Preço mínimo da corrida (R$)</string>
     <string name="tarifa_raio">Raio de busca de motoristas (km)</string>
     <string name="tarifa_salvar">Salvar tarifas</string>
     <string name="tarifa_salva">Tarifas salvas. Já valem para as próximas corridas.</string>
@@ -240,9 +287,11 @@ Sexo: %3$s
     <string name="admin_documentos">Documentos (toque para ampliar)</string>
     <string name="admin_detalhe_pessoal">CPF: %1$s\nNascimento: %2$s (%3$s anos)\nSexo: %4$s\nCelular: %5$s\nE-mail: %6$s</string>
     <string name="admin_detalhe_cnh">CNH nº %1$s\nCategoria: %2$s\nValidade: %3$s</string>
-    <string name="admin_detalhe_veiculo">%1$s %2$s %3$s\nCor: %4$s\nPlaca: %5$s</string>
+    <string name="admin_detalhe_veiculo">%1$s %2$s %3$s\nCor: %4$s\nPlaca: %5$s\nTipo: %6$s · 4 portas: %7$s · Ar-condicionado: %8$s</string>
+    <string name="sim">sim</string>
+    <string name="nao">não</string>
 
     <!-- Termos -->
     <string name="termos_titulo">Termos de Uso e Privacidade</string>
-    <string name="termos_texto">O Start é um aplicativo da CJ Studio Technology que conecta passageiros a motoristas parceiros para corridas urbanas.\n\n1. Cadastro\nVocê precisa informar dados verdadeiros: nome completo, CPF, celular, e-mail e foto. Motoristas também enviam CNH válida e documento do veículo (CRLV), que são conferidos antes da aprovação.\n\n2. Uso dos dados\nSeus dados são usados para criar e proteger sua conta, identificar passageiros e motoristas durante a corrida, prevenir fraudes e cumprir obrigações legais. Documentos de motoristas são vistos apenas pela equipe de análise.\n\n3. Compartilhamento\nDurante uma corrida, o passageiro vê nome, foto, carro e placa do motorista, e o motorista vê nome e foto do passageiro. Não vendemos seus dados.\n\n4. Conduta\nÉ proibido usar o app para atividades ilegais, discriminar, assediar ou ameaçar qualquer pessoa. Contas que descumprirem estas regras podem ser bloqueadas.\n\n5. Seus direitos (LGPD)\nVocê pode pedir acesso, correção ou exclusão dos seus dados pelo e-mail cjstudiotechnology@gmail.com.\n\n6. Contato\nCJ Studio Technology, cjstudiotechnology@gmail.com</string>
+    <string name="termos_texto">O Start é um aplicativo da CJ Studio Technology que conecta passageiros a motoristas parceiros para corridas urbanas.\n\n1. Cadastro\nVocê precisa informar dados verdadeiros: nome completo, CPF, celular, e-mail e foto. Motoristas também enviam CNH válida e documento do veículo (CRLV), que são conferidos antes da aprovação.\n\n2. Uso dos dados\nSeus dados são usados para criar e proteger sua conta, identificar passageiros e motoristas durante a corrida, prevenir fraudes e cumprir obrigações legais. Documentos de motoristas são vistos apenas pela equipe de análise.\n\n3. Compartilhamento\nDurante uma corrida, o passageiro vê nome, foto, carro e placa do motorista, e o motorista vê nome e foto do passageiro. Não vendemos seus dados.\n\n4. Regras para motoristas\n• Carro com no máximo 10 anos de uso, hatch ou sedã, com 4 portas e ar-condicionado funcionando.\n• Manter o carro sempre limpo por dentro.\n• Levar no máximo 3 passageiros no banco de trás. O 4º passageiro, no banco da frente, só com o seu aceite (a corrida fica 20% mais cara).\n\n5. Regras para passageiros\n• Ajudar a manter o carro limpo ao entrar e ao sair.\n• É proibido comer ou beber dentro do carro.\n• No máximo 3 passageiros no banco de trás. Se houver um 4º passageiro, informe antes de pedir a corrida: o motorista pode aceitar ou não, e o valor fica 20% maior.\n• Paradas extras pedidas durante a viagem têm um valor adicional por parada.\n\n6. Preço\nO valor considera o deslocamento do motorista até você mais a viagem, e inclui a taxa da plataforma (15%). O detalhamento aparece no fim de cada corrida.\n\n7. Conduta\nÉ proibido usar o app para atividades ilegais, discriminar, assediar ou ameaçar qualquer pessoa. Contas que descumprirem estas regras podem ser bloqueadas.\n\n8. Seus direitos (LGPD)\nVocê pode pedir acesso, correção ou exclusão dos seus dados pelo e-mail cjstudiotechnology@gmail.com.\n\n9. Contato\nCJ Studio Technology, cjstudiotechnology@gmail.com</string>
 </resources>

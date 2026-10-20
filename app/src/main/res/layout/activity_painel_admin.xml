@@ -238,6 +238,12 @@
                     android:layout_marginBottom="12dp"
                     android:text="@string/tarifa_explicacao" />
 
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_minimo_motorista" />
+                <EditText android:id="@+id/etMinimoMotorista" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_km_faixa" />
+                <EditText android:id="@+id/etKmFaixa" style="@style/Campo" android:inputType="numberDecimal" />
+
                 <TextView style="@style/RotuloCampo" android:text="@string/tarifa_bandeirada" />
                 <EditText android:id="@+id/etBandeirada" style="@style/Campo" android:inputType="numberDecimal" />
 
@@ -247,8 +253,14 @@
                 <TextView style="@style/RotuloCampo" android:text="@string/tarifa_por_minuto" />
                 <EditText android:id="@+id/etPorMinuto" style="@style/Campo" android:inputType="numberDecimal" />
 
-                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_minimo" />
-                <EditText android:id="@+id/etMinimo" style="@style/Campo" android:inputType="numberDecimal" />
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_taxa_plataforma" />
+                <EditText android:id="@+id/etTaxaPlataforma" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_quarto_passageiro" />
+                <EditText android:id="@+id/etQuartoPassageiro" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_por_parada" />
+                <EditText android:id="@+id/etPorParada" style="@style/Campo" android:inputType="numberDecimal" />
 
                 <TextView style="@style/RotuloCampo" android:text="@string/tarifa_raio" />
                 <EditText android:id="@+id/etRaio" style="@style/Campo" android:inputType="numberDecimal" />

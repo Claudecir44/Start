@@ -196,3 +196,4 @@ exports.estimarCorrida = corridas.estimarCorrida;
 exports.pedirCorrida = corridas.pedirCorrida;
 exports.aceitarCorrida = corridas.aceitarCorrida;
 exports.acaoCorrida = corridas.acaoCorrida;
+exports.adicionarParada = corridas.adicionarParada;

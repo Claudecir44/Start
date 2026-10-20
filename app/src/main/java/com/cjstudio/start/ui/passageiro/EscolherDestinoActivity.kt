@@ -36,7 +36,12 @@ class EscolherDestinoActivity : AppCompatActivity() {
         binding = ActivityEscolherDestinoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.topo.tvTitulo.setText(R.string.home_para_onde)
+        binding.topo.tvTitulo.setText(if (viewModel.modoParada) R.string.corrida_parada_titulo else R.string.home_para_onde)
+        if (viewModel.modoParada) {
+            binding.etPartida.visibility = View.GONE
+            binding.tvMinhaLocalizacao.visibility = View.GONE
+            binding.etDestino.setHint(R.string.corrida_parada_hint)
+        }
         binding.topo.btnVoltar.setOnClickListener { finish() }
         binding.rvSugestoes.layoutManager = LinearLayoutManager(this)
         binding.rvSugestoes.adapter = adapter
@@ -93,5 +98,10 @@ class EscolherDestinoActivity : AppCompatActivity() {
             holder.binding.tvSecundario.text = s.secundario
             holder.binding.root.setOnClickListener { aoTocar(s) }
         }
+    }
+
+    companion object {
+        // Abre só com o campo de destino, pra adicionar uma parada na corrida.
+        const val EXTRA_MODO_PARADA = "modoParada"
     }
 }

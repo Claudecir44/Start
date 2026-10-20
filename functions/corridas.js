@@ -1,13 +1,13 @@
-// Ciclo da corrida: estimar, pedir, aceitar, embarcar, finalizar, cancelar.
-// Preço, aceite e mudança de situação acontecem SÓ aqui (Admin SDK):
-// firestore.rules não deixa o app criar corrida nem mudar status/valor.
+// Ciclo da corrida: estimar, pedir, aceitar, embarcar, parada extra,
+// finalizar, cancelar. Preço, aceite e mudança de situação acontecem SÓ aqui
+// (Admin SDK): firestore.rules não deixa o app criar corrida nem mudar
+// status/valor. As regras de preço ficam em tarifa.js.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
+const { TARIFA_PADRAO, calcularCorrida } = require('./tarifa');
+const notificar = require('./notificacoes');
 
 const MAPS_SERVER_KEY = process.env.MAPS_SERVER_KEY || '';
-
-// Precisa bater com Tarifa.PADRAO no app.
-const TARIFA_PADRAO = { bandeirada: 4.0, porKm: 1.8, porMinuto: 0.3, minimo: 8.0, raioBuscaKm: 10.0 };
 
 // Precisa bater com StatusCorrida no app.
 const STATUS = {
@@ -18,6 +18,7 @@ const STATUS = {
     CANCELADA: 'cancelada',
 };
 const ATIVAS = [STATUS.PROCURANDO, STATUS.ACEITA, STATUS.EM_ANDAMENTO];
+const MAX_PARADAS = 3;
 
 function exigirLogin(request) {
     const uid = request.auth && request.auth.uid;
@@ -38,16 +39,6 @@ function lerLocal(valor, nome) {
 async function lerTarifa() {
     const doc = await admin.firestore().collection('config').doc('tarifa').get();
     return { ...TARIFA_PADRAO, ...(doc.exists ? doc.data() : {}) };
-}
-
-// Fórmula atual (provisória — o dono vai definir regras novas de cobrança):
-// bandeirada + km + minuto, nunca abaixo do mínimo, arredondada pra cima
-// nos 50 centavos.
-function calcularValor(tarifa, distanciaMetros, duracaoSegundos) {
-    const bruto = tarifa.bandeirada
-        + tarifa.porKm * (distanciaMetros / 1000)
-        + tarifa.porMinuto * (duracaoSegundos / 60);
-    return Math.ceil(Math.max(bruto, tarifa.minimo) * 2) / 2;
 }
 
 // Rota de carro com trânsito (Google Routes API).
@@ -82,28 +73,37 @@ async function calcularRota(origem, destino) {
     };
 }
 
-async function estimar(origem, destino) {
+// Antes de existir motorista: só a viagem (deslocamento 0) — é o "a partir
+// de" que o passageiro vê. O valor final sai no aceite.
+async function estimar(origem, destino, quartoPassageiro) {
     const [rota, tarifa] = await Promise.all([calcularRota(origem, destino), lerTarifa()]);
     if (rota.distanciaMetros < 200) {
         throw new HttpsError('invalid-argument', 'A partida e o destino estão perto demais.');
     }
-    return { ...rota, valor: calcularValor(tarifa, rota.distanciaMetros, rota.duracaoSegundos) };
+    const calculo = calcularCorrida(tarifa, {
+        viagemMetros: rota.distanciaMetros,
+        viagemSegundos: rota.duracaoSegundos,
+        quartoPassageiro,
+    });
+    return { rota, tarifa, calculo };
 }
 
-// Preço e rota antes de pedir (o passageiro decide se pede).
 exports.estimarCorrida = onCall(async (request) => {
     exigirLogin(request);
     const dados = request.data || {};
-    return estimar(lerLocal(dados.origem, 'partida'), lerLocal(dados.destino, 'destino'));
+    const { rota, calculo } = await estimar(
+        lerLocal(dados.origem, 'partida'), lerLocal(dados.destino, 'destino'), dados.quartoPassageiro === true
+    );
+    return { ...rota, valor: calculo.valorTotal, calculo };
 });
 
-// Cria a corrida (status procurando). Recalcula rota e preço aqui — o valor
-// mostrado antes no app é só a estimativa.
+// Cria a corrida (procurando motorista) e avisa os motoristas próximos.
 exports.pedirCorrida = onCall(async (request) => {
     const uid = exigirLogin(request);
     const dados = request.data || {};
     const origem = lerLocal(dados.origem, 'partida');
     const destino = lerLocal(dados.destino, 'destino');
+    const quartoPassageiro = dados.quartoPassageiro === true;
     const db = admin.firestore();
 
     const perfilRef = db.collection('passageiros').doc(uid);
@@ -118,10 +118,9 @@ exports.pedirCorrida = onCall(async (request) => {
         }
     }
 
-    const estimativa = await estimar(origem, destino);
+    const { rota, tarifa, calculo } = await estimar(origem, destino, quartoPassageiro);
     const corridaRef = db.collection('corridas').doc();
-    const lote = db.batch();
-    lote.set(corridaRef, {
+    const corrida = {
         status: STATUS.PROCURANDO,
         passageiroId: uid,
         passageiroNome: p.nomeCompleto || '',
@@ -129,20 +128,29 @@ exports.pedirCorrida = onCall(async (request) => {
         passageiroTelefone: p.telefone || null,
         origem,
         destino,
-        distanciaMetros: estimativa.distanciaMetros,
-        duracaoSegundos: estimativa.duracaoSegundos,
-        polyline: estimativa.polyline,
-        valor: estimativa.valor,
+        paradas: [],
+        quartoPassageiro,
+        distanciaMetros: rota.distanciaMetros,
+        duracaoSegundos: rota.duracaoSegundos,
+        polyline: rota.polyline,
+        // Prévia sem o deslocamento; aceitarCorrida grava o valor final.
+        valorEstimado: calculo.valorTotal,
+        valor: calculo.valorTotal,
+        calculo,
         formaPagamento: 'direto',
         criadaEm: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    };
+    const lote = db.batch();
+    lote.set(corridaRef, corrida);
     lote.update(perfilRef, { corridaAtualId: corridaRef.id });
     await lote.commit();
-    return { corridaId: corridaRef.id, valor: estimativa.valor };
+
+    await notificar.avisarMotoristasProximos(corridaRef.id, corrida, tarifa.raioBuscaKm);
+    return { corridaId: corridaRef.id, valor: calculo.valorTotal };
 });
 
-// Motorista aceita. Transação: se dois aceitarem ao mesmo tempo, só o
-// primeiro leva; o outro recebe "já foi aceita por outro motorista".
+// Motorista aceita. O preço final usa a rota real do motorista até o
+// passageiro. Transação: se dois aceitarem juntos, só o primeiro leva.
 exports.aceitarCorrida = onCall(async (request) => {
     const uid = exigirLogin(request);
     const corridaId = String((request.data && request.data.corridaId) || '');
@@ -151,10 +159,29 @@ exports.aceitarCorrida = onCall(async (request) => {
     const motoristaRef = db.collection('motoristas').doc(uid);
     const corridaRef = db.collection('corridas').doc(corridaId);
 
+    // Rota e preço FORA da transação (chamada externa); a transação só
+    // confere que nada mudou e grava.
+    const [motoristaAntes, corridaAntes, tarifa] = await Promise.all([motoristaRef.get(), corridaRef.get(), lerTarifa()]);
+    if (!motoristaAntes.exists) throw new HttpsError('failed-precondition', 'Cadastro de motorista não encontrado.');
+    if (!corridaAntes.exists || corridaAntes.data().status !== STATUS.PROCURANDO) {
+        throw new HttpsError('failed-precondition', 'Esta corrida já foi aceita por outro motorista ou cancelada.');
+    }
+    const local = motoristaAntes.data().localizacao;
+    if (!local) throw new HttpsError('failed-precondition', 'Ative a localização para aceitar corridas.');
+    const c0 = corridaAntes.data();
+    const deslocamento = await calcularRota(local, c0.origem);
+    const calculo = calcularCorrida(tarifa, {
+        deslocamentoMetros: deslocamento.distanciaMetros,
+        deslocamentoSegundos: deslocamento.duracaoSegundos,
+        viagemMetros: c0.distanciaMetros,
+        viagemSegundos: c0.duracaoSegundos,
+        quartoPassageiro: c0.quartoPassageiro === true,
+        paradas: 0,
+    });
+
     await db.runTransaction(async (tx) => {
         const motoristaDoc = await tx.get(motoristaRef);
         const corridaDoc = await tx.get(corridaRef);
-        if (!motoristaDoc.exists) throw new HttpsError('failed-precondition', 'Cadastro de motorista não encontrado.');
         const m = motoristaDoc.data();
         if (m.status !== 'aprovado') throw new HttpsError('permission-denied', 'Seu cadastro ainda não está aprovado.');
         if (!m.online) throw new HttpsError('failed-precondition', 'Fique online para aceitar corridas.');
@@ -173,11 +200,64 @@ exports.aceitarCorrida = onCall(async (request) => {
             motoristaTelefone: m.telefone || null,
             veiculo: m.veiculo || null,
             motoristaLocal: m.localizacao || null,
+            // Caminho do motorista até o passageiro, desenhado no mapa do app
+            // (a navegação acontece dentro do Start, não no Google Maps).
+            polylineDeslocamento: deslocamento.polyline,
+            valor: calculo.valorTotal,
+            calculo,
             aceitaEm: admin.firestore.FieldValue.serverTimestamp(),
         });
         tx.update(motoristaRef, { corridaAtualId: corridaId });
     });
-    return { ok: true };
+
+    const v = m2(calculo.valorTotal);
+    await notificar.avisarPassageiro(c0.passageiroId, 'Motorista a caminho',
+        (motoristaAntes.data().nomeCompleto || 'O motorista') + ' aceitou sua corrida. Valor: ' + v + '.', corridaId);
+    return { ok: true, valor: calculo.valorTotal };
+});
+
+function m2(v) {
+    return 'R$ ' + v.toFixed(2).replace('.', ',');
+}
+
+// Passageiro pede uma parada extra durante a corrida: + valorPorParada.
+exports.adicionarParada = onCall(async (request) => {
+    const uid = exigirLogin(request);
+    const corridaId = String((request.data && request.data.corridaId) || '');
+    const parada = lerLocal(request.data && request.data.parada, 'parada');
+    const db = admin.firestore();
+    const corridaRef = db.collection('corridas').doc(corridaId);
+    const tarifa = await lerTarifa();
+    let motoristaId = null;
+    let valorNovo = 0;
+
+    await db.runTransaction(async (tx) => {
+        const doc = await tx.get(corridaRef);
+        if (!doc.exists) throw new HttpsError('not-found', 'Corrida não encontrada.');
+        const c = doc.data();
+        if (c.passageiroId !== uid) throw new HttpsError('permission-denied', 'Esta corrida não é sua.');
+        if (![STATUS.ACEITA, STATUS.EM_ANDAMENTO].includes(c.status)) {
+            throw new HttpsError('failed-precondition', 'Só dá pra adicionar parada com a corrida em andamento.');
+        }
+        const paradas = [...(c.paradas || []), parada];
+        if (paradas.length > MAX_PARADAS) throw new HttpsError('failed-precondition', 'Máximo de ' + MAX_PARADAS + ' paradas por corrida.');
+        const base = c.calculo || {};
+        const calculo = calcularCorrida(tarifa, {
+            deslocamentoMetros: base.deslocamentoMetros || 0,
+            deslocamentoSegundos: base.deslocamentoSegundos || 0,
+            viagemMetros: c.distanciaMetros,
+            viagemSegundos: c.duracaoSegundos,
+            quartoPassageiro: c.quartoPassageiro === true,
+            paradas: paradas.length,
+        });
+        motoristaId = c.motoristaId;
+        valorNovo = calculo.valorTotal;
+        tx.update(corridaRef, { paradas, calculo, valor: calculo.valorTotal });
+    });
+
+    await notificar.avisarMotorista(motoristaId, 'Nova parada na corrida',
+        (parada.endereco || 'Parada extra') + ' · novo valor ' + m2(valorNovo), corridaId);
+    return { ok: true, valor: valorNovo };
 });
 
 // Ações depois do pedido:
@@ -192,19 +272,17 @@ exports.acaoCorrida = onCall(async (request) => {
     const db = admin.firestore();
     const corridaRef = db.collection('corridas').doc(corridaId);
     const agora = admin.firestore.FieldValue.serverTimestamp();
+    let c = null;
+    let porMotorista = false;
 
     await db.runTransaction(async (tx) => {
         const doc = await tx.get(corridaRef);
         if (!doc.exists) throw new HttpsError('not-found', 'Corrida não encontrada.');
-        const c = doc.data();
+        c = doc.data();
         const ehPassageiro = c.passageiroId === uid;
         const ehMotorista = c.motoristaId === uid;
+        porMotorista = ehMotorista;
         if (!ehPassageiro && !ehMotorista) throw new HttpsError('permission-denied', 'Esta corrida não é sua.');
-
-        const liberarPerfis = () => {
-            tx.update(db.collection('passageiros').doc(c.passageiroId), { corridaAtualId: null });
-            if (c.motoristaId) tx.update(db.collection('motoristas').doc(c.motoristaId), { corridaAtualId: null });
-        };
 
         if (acao === 'embarcou') {
             if (!ehMotorista || c.status !== STATUS.ACEITA) throw new HttpsError('failed-precondition', 'Ação não permitida agora.');
@@ -219,11 +297,22 @@ exports.acaoCorrida = onCall(async (request) => {
                 throw new HttpsError('failed-precondition', 'A corrida não pode mais ser cancelada.');
             }
             tx.update(corridaRef, { status: STATUS.CANCELADA, canceladaPor: ehMotorista ? 'motorista' : 'passageiro', canceladaEm: agora });
-            liberarPerfis();
+            tx.update(db.collection('passageiros').doc(c.passageiroId), { corridaAtualId: null });
+            if (c.motoristaId) tx.update(db.collection('motoristas').doc(c.motoristaId), { corridaAtualId: null });
         } else {
             throw new HttpsError('invalid-argument', 'Ação desconhecida.');
         }
     });
+
+    if (acao === 'finalizar') {
+        await notificar.avisarPassageiro(c.passageiroId, 'Você chegou!',
+            'Corrida finalizada. Pague ' + m2(c.valor) + ' ao motorista (dinheiro ou Pix).', corridaId);
+    } else if (acao === 'cancelar') {
+        if (porMotorista) {
+            await notificar.avisarPassageiro(c.passageiroId, 'Corrida cancelada', 'O motorista cancelou. Você pode pedir outra corrida.', corridaId);
+        } else if (c.motoristaId) {
+            await notificar.avisarMotorista(c.motoristaId, 'Corrida cancelada', 'O passageiro cancelou a corrida.', corridaId);
+        }
+    }
     return { ok: true };
 });
-

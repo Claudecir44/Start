@@ -8,11 +8,15 @@ import kotlinx.coroutines.flow.Flow
 // Corridas. Tudo que muda situação ou preço passa pelas Cloud Functions
 // (functions/corridas.js); o app só lê e o motorista envia a posição.
 interface ICorridaRepository {
-    // Rota e preço antes de pedir.
-    suspend fun estimar(origem: Local, destino: Local): Result<EstimativaCorrida>
+    // Rota e preço "a partir de" antes de pedir (sem o deslocamento do
+    // motorista, que só existe depois do aceite).
+    suspend fun estimar(origem: Local, destino: Local, quartoPassageiro: Boolean): Result<EstimativaCorrida>
 
-    // Cria a corrida (procurando motorista). Devolve o id.
-    suspend fun pedir(origem: Local, destino: Local): Result<String>
+    // Cria a corrida (procurando motorista) e avisa os motoristas próximos.
+    suspend fun pedir(origem: Local, destino: Local, quartoPassageiro: Boolean): Result<String>
+
+    // Parada extra pedida pelo passageiro durante a corrida (+ valor por parada).
+    suspend fun adicionarParada(corridaId: String, parada: Local): Result<Unit>
 
     // Motorista aceita (só um consegue, o servidor garante).
     suspend fun aceitar(corridaId: String): Result<Unit>

@@ -6,7 +6,12 @@ data class Veiculo(
     var modelo: String? = null,
     var ano: Int? = null,
     var cor: String? = null,
-    var placa: String? = null
+    var placa: String? = null,
+    // Critérios do Start: hatch ou sedã, 4 portas e ar-condicionado
+    // funcionando (ver ValidacaoMotorista).
+    var tipo: String? = null,
+    var quatroPortas: Boolean = false,
+    var arCondicionado: Boolean = false
 ) {
     fun descricao(): String = listOfNotNull(marca, modelo, cor, ano?.toString())
         .filter { it.isNotBlank() }

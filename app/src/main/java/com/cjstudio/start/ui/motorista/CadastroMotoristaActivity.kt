@@ -80,23 +80,13 @@ class CadastroMotoristaActivity : AppCompatActivity() {
         val m = binding.motorista
         viewModel.cadastrar(
             CadastroMotoristaViewModel.Formulario(
-                nomeCompleto = d.etNome.text.toString(),
                 cpf = d.etCpf.text.toString(),
-                dataNascimento = m.etNascimento.text.toString(),
-                telefone = d.etTelefone.text.toString(),
                 email = d.etEmail.text.toString(),
                 senha = d.etSenha.text.toString(),
                 confirmarSenha = d.etConfirmarSenha.text.toString(),
                 sexo = d.sexoSelecionado(),
-                cnhNumero = m.etCnhNumero.text.toString(),
-                cnhCategoria = m.categoriaSelecionada(),
-                cnhValidade = m.etCnhValidade.text.toString(),
-                marca = m.etMarca.text.toString(),
-                modelo = m.etModelo.text.toString(),
-                ano = m.etAno.text.toString(),
-                cor = m.etCor.text.toString(),
-                placa = m.etPlaca.text.toString(),
-                aceitouTermos = binding.envio.cbTermos.isChecked
+                aceitouTermos = binding.envio.cbTermos.isChecked,
+                dados = m.dados(d.etNome.text.toString(), d.etTelefone.text.toString())
             )
         )
     }

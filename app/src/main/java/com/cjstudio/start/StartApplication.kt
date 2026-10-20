@@ -2,6 +2,9 @@ package com.cjstudio.start
 
 import android.app.Activity
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.ViewCompat
@@ -29,6 +32,7 @@ class StartApplication : Application() {
         // Qual dos três apps e se é build de teste — pra filtrar no Crashlytics.
         falhas.definirChave("tipo", AppTipo.atual)
         falhas.definirChave("debug", BuildConfig.DEBUG.toString())
+        criarCanaisNotificacao()
 
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -49,5 +53,27 @@ class StartApplication : Application() {
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
             override fun onActivityDestroyed(activity: Activity) {}
         })
+    }
+
+    // "Nova corrida" (motorista) com prioridade máxima e som; demais avisos
+    // da corrida (motorista a caminho, cancelou, fim). Os ids precisam bater
+    // com functions/notificacoes.js.
+    private fun criarCanaisNotificacao() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val gerenciador = getSystemService(NotificationManager::class.java) ?: return
+        gerenciador.createNotificationChannel(
+            NotificationChannel(CANAL_CORRIDAS, getString(R.string.canal_corridas), NotificationManager.IMPORTANCE_HIGH).apply {
+                description = getString(R.string.canal_corridas_descricao)
+                enableVibration(true)
+            }
+        )
+        gerenciador.createNotificationChannel(
+            NotificationChannel(CANAL_AVISOS, getString(R.string.canal_avisos), NotificationManager.IMPORTANCE_HIGH)
+        )
+    }
+
+    companion object {
+        const val CANAL_CORRIDAS = "corridas"
+        const val CANAL_AVISOS = "avisos"
     }
 }

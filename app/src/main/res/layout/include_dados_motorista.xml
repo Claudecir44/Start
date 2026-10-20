@@ -99,6 +99,54 @@
         android:hint="@string/motorista_placa"
         android:inputType="textCapCharacters|textNoSuggestions" />
 
+    <!-- Critérios do Start: até 10 anos, hatch ou sedã, 4 portas, ar. -->
+    <TextView
+        style="@style/TextoCorpo"
+        android:layout_marginBottom="6dp"
+        android:text="@string/veiculo_requisitos"
+        android:textSize="13sp" />
+
+    <RadioGroup
+        android:id="@+id/rgTipoVeiculo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbHatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:buttonTint="@color/amarelo"
+            android:text="@string/veiculo_hatch"
+            android:textColor="@color/texto" />
+
+        <RadioButton
+            android:id="@+id/rbSedan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/amarelo"
+            android:text="@string/veiculo_sedan"
+            android:textColor="@color/texto" />
+    </RadioGroup>
+
+    <CheckBox
+        android:id="@+id/cbQuatroPortas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/amarelo"
+        android:text="@string/veiculo_quatro_portas"
+        android:textColor="@color/texto" />
+
+    <CheckBox
+        android:id="@+id/cbArCondicionado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:buttonTint="@color/amarelo"
+        android:text="@string/veiculo_ar_condicionado"
+        android:textColor="@color/texto" />
+
     <include
         android:id="@+id/fotoCrlv"
         layout="@layout/include_foto_documento" />

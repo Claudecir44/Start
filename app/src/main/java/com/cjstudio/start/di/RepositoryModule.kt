@@ -9,7 +9,9 @@ import com.cjstudio.start.data.repository.ICorridaRepository
 import com.cjstudio.start.data.repository.IEnderecoRepository
 import com.cjstudio.start.data.repository.ILocalizacaoRepository
 import com.cjstudio.start.data.repository.ITarifaRepository
+import com.cjstudio.start.data.repository.INotificacaoRepository
 import com.cjstudio.start.data.repository.LocalizacaoRepository
+import com.cjstudio.start.data.repository.NotificacaoRepository
 import com.cjstudio.start.data.repository.TarifaRepository
 import com.cjstudio.start.data.repository.FalhasRepository
 import com.cjstudio.start.data.repository.IAdminRepository
@@ -69,4 +71,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindEnderecoRepository(impl: EnderecoRepository): IEnderecoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificacaoRepository(impl: NotificacaoRepository): INotificacaoRepository
 }

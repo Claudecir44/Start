@@ -1,5 +1,6 @@
 package com.cjstudio.start.ui.passageiro
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cjstudio.start.R
@@ -26,8 +27,13 @@ import javax.inject.Inject
 @HiltViewModel
 class EscolherDestinoViewModel @Inject constructor(
     private val enderecos: IEnderecoRepository,
-    private val localizacao: ILocalizacaoRepository
+    private val localizacao: ILocalizacaoRepository,
+    estado: SavedStateHandle
 ) : ViewModel() {
+
+    // Parada extra durante a corrida: só o campo de destino (a partida é a
+    // corrida que já está acontecendo).
+    val modoParada: Boolean = estado[EscolherDestinoActivity.EXTRA_MODO_PARADA] ?: false
 
     enum class Campo { PARTIDA, DESTINO }
 
@@ -99,6 +105,7 @@ class EscolherDestinoViewModel @Inject constructor(
                 return@launch
             }
             aqui = atual
+            if (modoParada) return@launch
             _partida.value = atual.copy(endereco = localizacao.endereco(atual.lat, atual.lng) ?: "Minha localização")
             conferirPronto()
         }
@@ -118,8 +125,12 @@ class EscolherDestinoViewModel @Inject constructor(
     }
 
     private suspend fun conferirPronto() {
-        val p = _partida.value ?: return
         val d = _destino.value ?: return
+        if (modoParada) {
+            _eventos.send(Evento.Pronto(d, d))
+            return
+        }
+        val p = _partida.value ?: return
         _eventos.send(Evento.Pronto(p, d))
     }
 }

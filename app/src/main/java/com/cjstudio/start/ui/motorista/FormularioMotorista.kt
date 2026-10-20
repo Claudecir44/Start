@@ -41,7 +41,14 @@ fun IncludeDadosMotoristaBinding.dados(nomeCompleto: String, telefone: String) =
     modelo = etModelo.text.toString(),
     ano = etAno.text.toString(),
     cor = etCor.text.toString(),
-    placa = etPlaca.text.toString()
+    placa = etPlaca.text.toString(),
+    tipoVeiculo = when (rgTipoVeiculo.checkedRadioButtonId) {
+        R.id.rbHatch -> ValidacaoMotorista.TIPO_HATCH
+        R.id.rbSedan -> ValidacaoMotorista.TIPO_SEDAN
+        else -> null
+    },
+    quatroPortas = cbQuatroPortas.isChecked,
+    arCondicionado = cbArCondicionado.isChecked
 )
 
 fun IncludeDadosMotoristaBinding.preencher(m: Motorista) {
@@ -56,6 +63,12 @@ fun IncludeDadosMotoristaBinding.preencher(m: Motorista) {
         etAno.setText(v.ano?.toString())
         etCor.setText(v.cor)
         etPlaca.setText(v.placa)
+        when (v.tipo) {
+            ValidacaoMotorista.TIPO_HATCH -> rbHatch.isChecked = true
+            ValidacaoMotorista.TIPO_SEDAN -> rbSedan.isChecked = true
+        }
+        cbQuatroPortas.isChecked = v.quatroPortas
+        cbArCondicionado.isChecked = v.arCondicionado
     }
     mostrarDocumento(fotoCnh.ivDocumento, m.cnhFotoUrl)
     mostrarDocumento(fotoCrlv.ivDocumento, m.crlvFotoUrl)
@@ -81,5 +94,8 @@ fun ValidacaoMotorista.Dados.veiculo() = Veiculo(
     modelo = modelo.trim(),
     ano = ano.toIntOrNull(),
     cor = cor.trim(),
-    placa = placa.uppercase(Locale.ROOT)
+    placa = placa.uppercase(Locale.ROOT),
+    tipo = tipoVeiculo,
+    quatroPortas = quatroPortas,
+    arCondicionado = arCondicionado
 )

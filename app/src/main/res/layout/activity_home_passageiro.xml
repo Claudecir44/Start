@@ -22,7 +22,16 @@
 
     <View style="@style/LinhaDivisoria" />
 
+    <!-- Corrida em andamento (no lugar do pedido). Ver PainelCorrida.kt. -->
+    <include
+        android:id="@+id/painelCorrida"
+        layout="@layout/include_painel_corrida"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <LinearLayout
+        android:id="@+id/painelPedido"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -102,6 +111,14 @@
                 </LinearLayout>
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:text="@string/corrida_valor_a_partir"
+                    android:textColor="@color/texto_secundario"
+                    android:textSize="11sp" />
+
+                <TextView
                     android:id="@+id/tvValor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -109,6 +126,22 @@
                     android:textSize="26sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cbQuartoPassageiro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:buttonTint="@color/amarelo"
+                android:text="@string/corrida_quarto_passageiro_opcao"
+                android:textColor="@color/texto"
+                android:textSize="13sp" />
+
+            <TextView
+                style="@style/TextoCorpo"
+                android:layout_marginTop="4dp"
+                android:text="@string/corrida_lembrete_regras"
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/btnPedir"

@@ -1,45 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Corrida em andamento (passageiro e motorista usam o mesmo layout; cada
-     tela mostra só os botões que fazem sentido pra ela). -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Painel da corrida em andamento (abaixo da linha de baixo da tela
+     inicial, passageiro e motorista). Ver PainelCorrida.kt. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/fundo">
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/mapa"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/painel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@drawable/bg_painel_inferior"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
 
         <TextView
             android:id="@+id/tvSituacao"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/amarelo"
-            android:textSize="20sp"
+            android:textSize="19sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvDetalhe"
             style="@style/TextoCorpo"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="2dp" />
 
         <ProgressBar
             android:id="@+id/progressoBusca"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:indeterminate="true"
             android:indeterminateTint="@color/amarelo"
             android:visibility="gone" />
@@ -49,17 +43,17 @@
             android:id="@+id/blocoPessoa"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_cartao"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="12dp"
+            android:padding="10dp"
             android:visibility="gone">
 
             <ImageView
                 android:id="@+id/ivPessoa"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_pessoa" />
@@ -76,7 +70,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/texto"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -102,19 +96,27 @@
         <TextView
             android:id="@+id/tvPartida"
             style="@style/LinhaEndereco"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="10dp"
             android:drawableStart="@drawable/ic_ponto_partida" />
+
+        <TextView
+            android:id="@+id/tvParadas"
+            style="@style/LinhaEndereco"
+            android:layout_marginTop="6dp"
+            android:drawableStart="@drawable/ic_ponto_parada"
+            android:maxLines="4"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tvDestino"
             style="@style/LinhaEndereco"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:drawableStart="@drawable/ic_ponto_destino" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -126,20 +128,47 @@
                 android:textColor="@color/texto_secundario"
                 android:textSize="13sp" />
 
-            <TextView
-                android:id="@+id/tvValor"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/amarelo"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                android:gravity="end"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvValorRotulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/texto_secundario"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/tvValor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/amarelo"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </LinearLayout>
+
+        <!-- "Como foi calculado" — no fim da corrida. -->
+        <TextView
+            android:id="@+id/tvCalculo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_cartao"
+            android:lineSpacingExtra="2dp"
+            android:padding="12dp"
+            android:textColor="@color/texto"
+            android:textSize="13sp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btnSecundario"
             style="@style/BotaoContorno"
-            android:layout_height="48dp"
-            android:layout_marginTop="14dp"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
             android:visibility="gone" />
 
         <Button
@@ -153,11 +182,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="4dp"
             android:padding="8dp"
             android:text="@string/corrida_cancelar"
             android:textColor="@color/vermelho"
             android:textSize="14sp"
             android:visibility="gone" />
     </LinearLayout>
-</FrameLayout>
+</ScrollView>

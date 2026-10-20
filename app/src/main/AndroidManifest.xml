@@ -7,6 +7,8 @@
          motorista (corridas próximas e acompanhamento no mapa). -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Avisos de corrida (pedida em tempo de execução no Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".StartApplication"
@@ -22,6 +24,23 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notificacao" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/amarelo" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="avisos" />
+
+        <service
+            android:name=".StartMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity
             android:name=".ui.common.SplashActivity"
@@ -51,14 +70,6 @@
             android:name=".ui.passageiro.EscolherDestinoActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.corrida.CorridaPassageiroActivity"
-            android:exported="false"
-            android:launchMode="singleTop" />
-        <activity
-            android:name=".ui.corrida.CorridaMotoristaActivity"
-            android:exported="false"
-            android:launchMode="singleTop" />
         <activity
             android:name=".ui.passageiro.EditarPassageiroActivity"
             android:exported="false"

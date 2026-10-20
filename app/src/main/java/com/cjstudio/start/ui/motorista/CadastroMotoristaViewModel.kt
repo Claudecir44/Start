@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cjstudio.start.R
 import com.cjstudio.start.data.model.Motorista
-import com.cjstudio.start.data.model.Veiculo
 import com.cjstudio.start.data.repository.IMotoristaRepository
 import com.cjstudio.start.ui.auth.LoginActivity
 import com.cjstudio.start.ui.common.UiTexto
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,24 +33,15 @@ class CadastroMotoristaViewModel @Inject constructor(
 
     enum class Foto { PERFIL, CNH, CRLV }
 
+    // Conta, CPF, sexo e termos + os dados de motorista (os mesmos da edição).
     data class Formulario(
-        val nomeCompleto: String,
         val cpf: String,
-        val dataNascimento: String,
-        val telefone: String,
         val email: String,
         val senha: String,
         val confirmarSenha: String,
         val sexo: String?,
-        val cnhNumero: String,
-        val cnhCategoria: String,
-        val cnhValidade: String,
-        val marca: String,
-        val modelo: String,
-        val ano: String,
-        val cor: String,
-        val placa: String,
-        val aceitouTermos: Boolean
+        val aceitouTermos: Boolean,
+        val dados: ValidacaoMotorista.Dados
     )
 
     sealed interface Evento {
@@ -80,23 +69,18 @@ class CadastroMotoristaViewModel @Inject constructor(
             _eventos.trySend(Evento.Mensagem(it))
             return
         }
+        val d = form.dados
         val motorista = Motorista(
-            nomeCompleto = form.nomeCompleto.trim(),
+            nomeCompleto = d.nomeCompleto.trim(),
             cpf = CpfUtil.somenteDigitos(form.cpf),
-            dataNascimento = form.dataNascimento,
+            dataNascimento = d.dataNascimento,
             email = form.email.trim().takeIf { !completandoCadastro },
-            telefone = form.telefone,
+            telefone = d.telefone,
             sexo = form.sexo,
-            cnhNumero = form.cnhNumero.filter { it.isDigit() },
-            cnhCategoria = form.cnhCategoria,
-            cnhValidade = form.cnhValidade,
-            veiculo = Veiculo(
-                marca = form.marca.trim(),
-                modelo = form.modelo.trim(),
-                ano = form.ano.toInt(),
-                cor = form.cor.trim(),
-                placa = form.placa.uppercase(Locale.ROOT)
-            )
+            cnhNumero = d.cnhNumero.filter { it.isDigit() },
+            cnhCategoria = d.cnhCategoria,
+            cnhValidade = d.cnhValidade,
+            veiculo = d.veiculo()
         )
         val fotos = _fotos.value
         _enviando.value = true
@@ -129,12 +113,8 @@ class CadastroMotoristaViewModel @Inject constructor(
             !completandoCadastro && !Validacao.email(form.email.trim()) -> texto(R.string.cadastro_erro_email)
             !completandoCadastro && !Validacao.senha(form.senha) -> texto(R.string.cadastro_erro_senha)
             !completandoCadastro && form.senha != form.confirmarSenha -> texto(R.string.cadastro_erro_senhas_diferentes)
-            else -> ValidacaoMotorista.validar(form.dadosMotorista(), Foto.CNH in fotos, Foto.CRLV in fotos)
+            else -> ValidacaoMotorista.validar(form.dados, Foto.CNH in fotos, Foto.CRLV in fotos)
                 ?: if (!form.aceitouTermos) texto(R.string.cadastro_erro_termos) else null
         }
     }
-
-    private fun Formulario.dadosMotorista() = ValidacaoMotorista.Dados(
-        nomeCompleto, dataNascimento, telefone, cnhNumero, cnhCategoria, cnhValidade, marca, modelo, ano, cor, placa
-    )
 }

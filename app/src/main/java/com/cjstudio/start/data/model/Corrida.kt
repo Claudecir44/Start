@@ -41,13 +41,23 @@ data class Corrida(
 
     var origem: Local? = null,
     var destino: Local? = null,
+    // Paradas extras pedidas pelo passageiro durante a corrida (adicionarParada).
+    var paradas: List<Local> = emptyList(),
+    // 4º passageiro no banco da frente (+20%, o motorista decide se aceita).
+    var quartoPassageiro: Boolean = false,
     var distanciaMetros: Long = 0,
     var duracaoSegundos: Long = 0,
     var polyline: String? = null,
+    // Caminho do motorista até a partida (gravado no aceite).
+    var polylineDeslocamento: String? = null,
 
-    // Valor calculado no servidor com a tarifa vigente; pago direto ao
-    // motorista (dinheiro ou Pix) nesta versão.
+    // Total que o passageiro paga (com a taxa da plataforma), calculado no
+    // servidor. Antes do aceite é a prévia sem o deslocamento do motorista
+    // (valorEstimado); no aceite vira o valor final. Pago direto ao motorista
+    // (dinheiro ou Pix) nesta versão.
     var valor: Double = 0.0,
+    var valorEstimado: Double = 0.0,
+    var calculo: CalculoCorrida? = null,
     var formaPagamento: String = "direto",
 
     var motoristaId: String? = null,
@@ -75,5 +85,7 @@ data class EstimativaCorrida(
     val distanciaMetros: Long,
     val duracaoSegundos: Long,
     val polyline: String,
-    val valor: Double
+    // "A partir de": ainda sem o deslocamento do motorista.
+    val valor: Double,
+    val quartoPassageiro: Boolean
 )
