@@ -32,7 +32,7 @@ class HomeMotoristaActivity : AppCompatActivity() {
         val abrirCadastro = View.OnClickListener {
             startActivity(Intent(this, EditarMotoristaActivity::class.java))
         }
-        binding.btnMeuCadastro.setOnClickListener(abrirCadastro)
+        binding.cabecalho.tvMeuPerfil.setOnClickListener(abrirCadastro)
         binding.cabecalho.ivFoto.setOnClickListener(abrirCadastro)
 
         coletar(viewModel.motorista) { motorista -> if (motorista != null) mostrar(motorista) }

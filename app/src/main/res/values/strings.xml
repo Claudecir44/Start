@@ -116,8 +116,8 @@
     <string name="motorista_offline_msg">Você está offline e não recebe corridas.</string>
 
     <!-- Editar cadastro do motorista -->
-    <string name="editar_titulo">Meu cadastro</string>
-    <string name="editar_meu_cadastro">Meu cadastro</string>
+    <string name="editar_titulo">Meu perfil</string>
+    <string name="meu_perfil">Meu perfil</string>
     <string name="editar_trocar_foto">Toque para trocar sua foto</string>
     <string name="editar_aviso">Foto e celular mudam na hora. Se mudar nome, nascimento, CNH ou carro, o cadastro volta para análise e você fica offline até ser aprovado de novo.</string>
     <string name="editar_dados_fixos">CPF: %1$s

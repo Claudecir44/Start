@@ -25,7 +25,7 @@ class HomePassageiroActivity : AppCompatActivity() {
 
         binding.cabecalho.btnSair.setOnClickListener { viewModel.sair() }
         val abrirCadastro = View.OnClickListener { startActivity(Intent(this, EditarPassageiroActivity::class.java)) }
-        binding.btnMeuCadastro.setOnClickListener(abrirCadastro)
+        binding.cabecalho.tvMeuPerfil.setOnClickListener(abrirCadastro)
         binding.cabecalho.ivFoto.setOnClickListener(abrirCadastro)
         binding.cardParaOnde.setOnClickListener {
             Toast.makeText(this, R.string.em_breve_corridas, Toast.LENGTH_LONG).show()

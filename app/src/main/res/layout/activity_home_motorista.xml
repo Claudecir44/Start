@@ -32,15 +32,6 @@
             android:layout_marginTop="6dp" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnMeuCadastro"
-        style="@style/BotaoContorno"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="20dp"
-        android:text="@string/editar_meu_cadastro" />
-
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
