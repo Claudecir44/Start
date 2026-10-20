@@ -97,13 +97,13 @@ android {
         create("passageiro") {
             applicationId = "com.cjstudio.start.passageiro"
             versionName = "1.0-passageiro"
-            resValue("string", "app_name", "Start")
+            resValue("string", "app_name", "Passageiro")
             buildConfigField("String", "TIPO", "\"passageiro\"")
         }
         create("motorista") {
             applicationId = "com.cjstudio.start.motorista"
             versionName = "1.0-motorista"
-            resValue("string", "app_name", "Start Motorista")
+            resValue("string", "app_name", "Motorista")
             buildConfigField("String", "TIPO", "\"motorista\"")
         }
         create("admin") {
