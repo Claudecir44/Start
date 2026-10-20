@@ -197,12 +197,6 @@
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
-        <Button
-            android:id="@+id/btnNovoAdmin"
-            style="@style/BotaoContorno"
-            android:layout_height="46dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/admin_novo_admin" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -227,5 +221,13 @@
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingBottom="16dp" />
+
+        <Button
+            android:id="@+id/btnNovoAdmin"
+            style="@style/BotaoContorno"
+            android:layout_height="46dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/admin_novo_admin" />
     </LinearLayout>
 </LinearLayout>
