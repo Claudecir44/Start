@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
             when (evento) {
                 LoginViewModel.Evento.IrParaInicio -> Navegacao.irLimpando(this, Navegacao.telaInicial())
                 LoginViewModel.Evento.CompletarCadastro -> perguntarCompletarCadastro()
-                is LoginViewModel.Evento.EmailNaoConfirmado -> avisarEmailNaoConfirmado(evento.email)
+                is LoginViewModel.Evento.EmailNaoConfirmado -> avisarEmailNaoConfirmado(evento.email, evento.reenviado)
                 is LoginViewModel.Evento.Mensagem -> mostrarMensagem(evento.texto)
             }
         }
@@ -68,10 +68,10 @@ class LoginActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun avisarEmailNaoConfirmado(email: String) {
+    private fun avisarEmailNaoConfirmado(email: String, reenviado: Boolean) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.verificar_email_titulo)
-            .setMessage(getString(R.string.verificar_email_login, email))
+            .setMessage(getString(if (reenviado) R.string.verificar_email_login else R.string.verificar_email_login_ja_enviado, email))
             .setPositiveButton(R.string.ok, null)
             .show()
     }

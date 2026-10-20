@@ -36,7 +36,7 @@ class LoginViewModel @Inject constructor(
     sealed interface Evento {
         data object IrParaInicio : Evento
         data object CompletarCadastro : Evento
-        data class EmailNaoConfirmado(val email: String) : Evento
+        data class EmailNaoConfirmado(val email: String, val reenviado: Boolean) : Evento
         data class Mensagem(val texto: UiTexto) : Evento
     }
 
@@ -58,7 +58,7 @@ class LoginViewModel @Inject constructor(
                 auth.entrar(email, senha).getOrThrow()
                 if (temPerfilNesteApp()) Evento.IrParaInicio else Evento.CompletarCadastro
             } catch (e: EmailNaoVerificadoException) {
-                Evento.EmailNaoConfirmado(email)
+                Evento.EmailNaoConfirmado(email, e.reenviado)
             } catch (e: Exception) {
                 if (e is ContaBloqueadaException) auth.sair()
                 Evento.Mensagem(e.paraUiTexto())

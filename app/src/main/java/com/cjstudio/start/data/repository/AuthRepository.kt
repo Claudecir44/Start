@@ -45,23 +45,29 @@ class AuthRepository @Inject constructor(
         // token do signIn nem sempre já traz isEmailVerified atualizado.
         etapa("atualizar conta") { usuario.reload().await() }
         if (!usuario.isEmailVerified) {
-            reenviarVerificacaoComIntervalo()
+            val reenviado = reenviarVerificacaoComIntervalo()
             auth.get().signOut()
-            throw EmailNaoVerificadoException()
+            throw EmailNaoVerificadoException(reenviado)
         }
         lembrarSessao(usuario.uid)
         usuario.uid
     }
 
-    private suspend fun reenviarVerificacaoComIntervalo() {
+    // Cada envio novo INVALIDA o link anterior: reenviar a cada tentativa de
+    // login fazia o link que a pessoa acabou de abrir já chegar vencido (caso
+    // real: confirmou e o app continuou pedindo confirmação). Só reenvia se o
+    // último envio deste aparelho tiver mais de INTERVALO_REENVIO_MS.
+    private suspend fun reenviarVerificacaoComIntervalo(): Boolean {
         val agora = System.currentTimeMillis()
         val ultimo = prefs.data.first()[KEY_ULTIMO_REENVIO_VERIFICACAO] ?: 0L
-        if (agora - ultimo < INTERVALO_REENVIO_MS) return
-        try {
+        if (agora - ultimo < INTERVALO_REENVIO_MS) return false
+        return try {
             auth.get().currentUser?.sendEmailVerification()?.await()
             prefs.edit { it[KEY_ULTIMO_REENVIO_VERIFICACAO] = agora }
+            true
         } catch (_: Exception) {
             // Best-effort: o bloqueio do login continua valendo de qualquer jeito.
+            false
         }
     }
 
@@ -121,6 +127,6 @@ class AuthRepository @Inject constructor(
     }
 
     private companion object {
-        const val INTERVALO_REENVIO_MS = 60_000L
+        const val INTERVALO_REENVIO_MS = 10 * 60_000L
     }
 }

@@ -49,7 +49,7 @@ class LoginAdminViewModel @Inject constructor(
                     { Evento.IrParaPainel },
                     { e ->
                         Evento.Mensagem(
-                            if (e is EmailNaoVerificadoException) texto(R.string.verificar_email_login, email) else e.paraUiTexto()
+                            if (e is EmailNaoVerificadoException) texto(if (e.reenviado) R.string.verificar_email_login else R.string.verificar_email_login_ja_enviado, email) else e.paraUiTexto()
                         )
                     }
                 )

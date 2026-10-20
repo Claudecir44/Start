@@ -37,7 +37,8 @@
     <string name="login_completar_sim">Completar</string>
     <string name="verificar_email_titulo">Confirme seu e-mail</string>
     <string name="verificar_email_cadastro">Cadastro feito! Enviamos um link de confirmação para %1$s.\n\nAbra o e-mail (olhe também o spam), toque no link e depois entre no app.</string>
-    <string name="verificar_email_login">Seu e-mail %1$s ainda não foi confirmado. Enviamos o link de novo: abra o e-mail (olhe também o spam), toque no link e entre de novo.</string>
+    <string name="verificar_email_login">Seu e-mail %1$s ainda não foi confirmado. Enviamos um link NOVO agora (os anteriores deixaram de valer): abra o e-mail mais recente (olhe também o spam), toque no link e entre de novo.</string>
+    <string name="verificar_email_login_ja_enviado">Seu e-mail %1$s ainda não foi confirmado. Já enviamos o link há pouco: abra o e-mail MAIS RECENTE do Start (olhe também o spam e Promoções), toque no link e entre de novo. Links de e-mails mais antigos não funcionam.</string>
 
     <!-- Cadastro (comum) -->
     <string name="cadastro_titulo_passageiro">Criar conta</string>
