@@ -55,8 +55,11 @@ class HomeMotoristaActivity : AppCompatActivity() {
             StatusMotorista.BLOQUEADO -> Triple(R.string.status_bloqueado, motivo(motorista, R.string.status_bloqueado_msg), R.color.vermelho)
             else -> Triple(R.string.status_em_analise, getString(R.string.status_em_analise_msg), R.color.amarelo)
         }
-        binding.tvStatusTitulo.setText(titulo)
-        binding.tvStatusTitulo.setTextColor(ContextCompat.getColor(this, cor))
+        binding.cabecalho.tvSituacao.visibility = View.VISIBLE
+        binding.cabecalho.tvSituacao.setText(titulo)
+        binding.cabecalho.tvSituacao.setTextColor(ContextCompat.getColor(this, cor))
+        // Aprovado não precisa de explicação: o cartão some e sobra o "Ficar online".
+        binding.cardSituacao.visibility = if (motorista.aprovado) View.GONE else View.VISIBLE
         binding.tvStatusMensagem.text = mensagem
 
         binding.btnOnline.visibility = if (motorista.aprovado) View.VISIBLE else View.GONE

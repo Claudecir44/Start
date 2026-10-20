@@ -9,7 +9,9 @@
         android:id="@+id/cabecalho"
         layout="@layout/include_cabecalho_usuario" />
 
+    <!-- Só aparece fora do "Aprovado" (em análise, reprovado, bloqueado). -->
     <LinearLayout
+        android:id="@+id/cardSituacao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
@@ -20,16 +22,8 @@
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/tvStatusTitulo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
             android:id="@+id/tvStatusMensagem"
-            style="@style/TextoCorpo"
-            android:layout_marginTop="6dp" />
+            style="@style/TextoCorpo" />
     </LinearLayout>
 
     <View
