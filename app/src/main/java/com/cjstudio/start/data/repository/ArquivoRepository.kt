@@ -19,7 +19,9 @@ class ArquivoRepository @Inject constructor(
         // storage.rules só aceita image/* — o content type precisa ir explícito
         // (arquivo temporário local não tem tipo).
         val metadados = StorageMetadata.Builder().setContentType("image/jpeg").build()
-        ref.putFile(uri, metadados).await()
-        ref.downloadUrl.await().toString()
+        etapa("enviar foto ($pasta)", limiteMs = 90_000) {
+            ref.putFile(uri, metadados).await()
+            ref.downloadUrl.await().toString()
+        }
     }
 }

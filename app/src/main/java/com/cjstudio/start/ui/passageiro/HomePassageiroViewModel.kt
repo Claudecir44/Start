@@ -32,10 +32,15 @@ class HomePassageiroViewModel @Inject constructor(
 
     init {
         falhas.definirUsuario(auth.uidLogado())
+    }
+
+    fun carregar() {
         viewModelScope.launch {
-            val atual = passageiros.buscarLogado().getOrNull()
-            // Perfil apagado/bloqueado enquanto o app estava aberto.
-            if (atual == null || atual.bloqueado) sair() else _passageiro.value = atual
+            // Falha de rede mantém a tela como está; só sai se o perfil
+            // sumiu ou foi bloqueado enquanto o app estava aberto.
+            passageiros.buscarLogado().onSuccess { atual ->
+                if (atual == null || atual.bloqueado) sair() else _passageiro.value = atual
+            }
         }
     }
 

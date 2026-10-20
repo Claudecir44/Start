@@ -40,6 +40,10 @@
             android:name=".ui.passageiro.HomePassageiroActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.passageiro.EditarPassageiroActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.motorista.CadastroMotoristaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

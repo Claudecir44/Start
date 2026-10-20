@@ -14,6 +14,10 @@ interface IPassageiroRepository {
 
     suspend fun buscarLogado(): Result<Passageiro?>
 
+    // O passageiro logado edita nome, celular e foto (null = mantém). CPF,
+    // e-mail e sexo não mudam (firestore.rules).
+    suspend fun atualizarPerfil(nomeCompleto: String, telefone: String, novaFoto: Uri?): Result<Unit>
+
     // ===== Admin =====
     suspend fun listarTodos(): Result<List<Passageiro>>
 

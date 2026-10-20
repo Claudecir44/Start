@@ -31,7 +31,7 @@ class CadastroMotoristaActivity : AppCompatActivity() {
     private var fotoPedida = Foto.PERFIL
 
     private val seletorFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) viewModel.definirFoto(fotoPedida, FotoUtil.copiarParaTemporario(this, uri) ?: uri)
+        if (uri != null) viewModel.definirFoto(fotoPedida, FotoUtil.prepararParaEnvio(this, uri) ?: uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

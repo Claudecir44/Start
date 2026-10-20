@@ -29,7 +29,7 @@ class PainelAdminActivity : AppCompatActivity() {
     private val adapter = ItemPessoaAdapter { item -> tocou(item) }
 
     private val seletorFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) viewModel.trocarMinhaFoto(FotoUtil.copiarParaTemporario(this, uri) ?: uri)
+        if (uri != null) viewModel.trocarMinhaFoto(FotoUtil.prepararParaEnvio(this, uri) ?: uri)
     }
 
     private val chipsFiltro by lazy {

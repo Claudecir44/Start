@@ -27,7 +27,7 @@ class CadastroPassageiroActivity : AppCompatActivity() {
     private val viewModel: CadastroPassageiroViewModel by viewModels()
 
     private val seletorFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) viewModel.definirFoto(FotoUtil.copiarParaTemporario(this, uri) ?: uri)
+        if (uri != null) viewModel.definirFoto(FotoUtil.prepararParaEnvio(this, uri) ?: uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

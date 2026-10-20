@@ -24,13 +24,13 @@ internal object FluxoCadastro {
     // senha == null: a pessoa já entrou pelo login e só falta este perfil.
     suspend fun obterConta(auth: IAuthRepository, email: String?, senha: String?): ContaCadastro =
         if (senha != null) {
-            auth.criarOuEntrarConta(email.orEmpty(), senha).getOrThrow()
+            etapa("criar conta") { auth.criarOuEntrarConta(email.orEmpty(), senha).getOrThrow() }
         } else {
             ContaCadastro(auth.uidLogado() ?: throw IllegalStateException("Sessão expirada. Entre de novo."), nova = false)
         }
 
     suspend fun garantirSemPerfil(perfil: DocumentReference) {
-        if (perfil.get().await().exists()) throw PerfilJaExisteException()
+        if (etapa("conferir perfil") { perfil.get().await().exists() }) throw PerfilJaExisteException()
     }
 
     // Conta confirmada entra direto; senão manda o link e sai (o login só
@@ -41,7 +41,8 @@ internal object FluxoCadastro {
             auth.lembrarSessao(conta.uid)
             ResultadoCadastro.PRONTO
         } else {
-            auth.enviarVerificacaoEmail()
+            // Cadastro já gravado: demora no envio não pode desfazer nada.
+            runCatching { etapa("enviar e-mail de confirmação") { auth.enviarVerificacaoEmail() } }
             auth.sair()
             ResultadoCadastro.CONFIRMAR_EMAIL
         }

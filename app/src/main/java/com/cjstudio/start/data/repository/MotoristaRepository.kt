@@ -7,7 +7,9 @@ import com.cjstudio.start.data.model.StatusMotorista
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -34,17 +36,23 @@ class MotoristaRepository @Inject constructor(
             motorista.email = auth.emailLogado()
             FluxoCadastro.garantirSemPerfil(colecao().document(uid))
 
-            ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid)
-            motorista.fotoUrl = arquivos.enviarImagem("fotos_perfil/$uid", foto).getOrThrow()
-            motorista.cnhFotoUrl = arquivos.enviarImagem("documentos_motorista/$uid", fotoCnh).getOrThrow()
-            motorista.crlvFotoUrl = arquivos.enviarImagem("documentos_motorista/$uid", fotoCrlv).getOrThrow()
+            etapa("conferir CPF") { ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid) }
+            // As três fotos sobem juntas (uma depois da outra triplicava a espera).
+            coroutineScope {
+                val perfil = async { arquivos.enviarImagem("fotos_perfil/$uid", foto).getOrThrow() }
+                val cnh = async { arquivos.enviarImagem("documentos_motorista/$uid", fotoCnh).getOrThrow() }
+                val crlv = async { arquivos.enviarImagem("documentos_motorista/$uid", fotoCrlv).getOrThrow() }
+                motorista.fotoUrl = perfil.await()
+                motorista.cnhFotoUrl = cnh.await()
+                motorista.crlvFotoUrl = crlv.await()
+            }
             motorista.status = StatusMotorista.EM_ANALISE
             motorista.online = false
 
             db.get().batch()
                 .set(db.get().collection(ReservaCpf.COLECAO).document(ReservaCpf.idDocumento(TIPO, cpf)), mapOf("uid" to uid, "tipo" to TIPO))
                 .set(colecao().document(uid), motorista)
-                .commit().await()
+                .let { lote -> etapa("gravar cadastro") { lote.commit().await() } }
 
             Result.success(FluxoCadastro.concluir(auth, conta))
         } catch (e: Exception) {
@@ -94,9 +102,14 @@ class MotoristaRepository @Inject constructor(
             "cnhValidade" to edicao.cnhValidade,
             "veiculo" to edicao.veiculo
         )
-        edicao.novaFoto?.let { dados["fotoUrl"] = arquivos.enviarImagem("fotos_perfil/$uid", it).getOrThrow() }
-        edicao.novaFotoCnh?.let { dados["cnhFotoUrl"] = arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() }
-        edicao.novaFotoCrlv?.let { dados["crlvFotoUrl"] = arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() }
+        coroutineScope {
+            val perfil = edicao.novaFoto?.let { async { arquivos.enviarImagem("fotos_perfil/$uid", it).getOrThrow() } }
+            val cnh = edicao.novaFotoCnh?.let { async { arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() } }
+            val crlv = edicao.novaFotoCrlv?.let { async { arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() } }
+            perfil?.let { dados["fotoUrl"] = it.await() }
+            cnh?.let { dados["cnhFotoUrl"] = it.await() }
+            crlv?.let { dados["crlvFotoUrl"] = it.await() }
+        }
 
         if (novaAnalise) {
             dados["status"] = StatusMotorista.EM_ANALISE

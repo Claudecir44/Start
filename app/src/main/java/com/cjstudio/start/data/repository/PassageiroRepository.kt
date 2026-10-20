@@ -28,13 +28,13 @@ class PassageiroRepository @Inject constructor(
             passageiro.email = auth.emailLogado()
             FluxoCadastro.garantirSemPerfil(colecao().document(uid))
 
-            ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid)
+            etapa("conferir CPF") { ReservaCpf.garantirLivre(db.get(), TIPO, cpf, uid) }
             passageiro.fotoUrl = arquivos.enviarImagem("fotos_perfil/$uid", foto).getOrThrow()
 
             db.get().batch()
                 .set(db.get().collection(ReservaCpf.COLECAO).document(ReservaCpf.idDocumento(TIPO, cpf)), mapOf("uid" to uid, "tipo" to TIPO))
                 .set(colecao().document(uid), passageiro)
-                .commit().await()
+                .let { lote -> etapa("gravar cadastro") { lote.commit().await() } }
 
             Result.success(FluxoCadastro.concluir(auth, conta))
         } catch (e: Exception) {
@@ -51,6 +51,14 @@ class PassageiroRepository @Inject constructor(
     override suspend fun buscarLogado(): Result<Passageiro?> {
         val uid = auth.uidLogado() ?: return Result.failure(IllegalStateException("Não há sessão ativa."))
         return buscar(uid)
+    }
+
+    override suspend fun atualizarPerfil(nomeCompleto: String, telefone: String, novaFoto: Uri?): Result<Unit> = runCatching {
+        val uid = auth.uidLogado() ?: throw IllegalStateException("Não há sessão ativa.")
+        val dados = mutableMapOf<String, Any>("nomeCompleto" to nomeCompleto, "telefone" to telefone)
+        novaFoto?.let { dados["fotoUrl"] = arquivos.enviarImagem("fotos_perfil/$uid", it).getOrThrow() }
+        etapa("salvar perfil") { colecao().document(uid).update(dados).await() }
+        Unit
     }
 
     override suspend fun listarTodos(): Result<List<Passageiro>> = runCatching {
