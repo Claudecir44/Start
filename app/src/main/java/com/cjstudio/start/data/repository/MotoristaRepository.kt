@@ -2,6 +2,7 @@ package com.cjstudio.start.data.repository
 
 import android.net.Uri
 import com.cjstudio.start.data.model.EdicaoMotorista
+import com.cjstudio.start.data.model.Local
 import com.cjstudio.start.data.model.Motorista
 import com.cjstudio.start.data.model.StatusMotorista
 import com.google.firebase.firestore.FieldValue
@@ -127,6 +128,12 @@ class MotoristaRepository @Inject constructor(
     override suspend fun definirOnline(online: Boolean): Result<Unit> = runCatching {
         val uid = auth.uidLogado() ?: throw IllegalStateException("Não há sessão ativa.")
         colecao().document(uid).update("online", online).await()
+        Unit
+    }
+
+    override suspend fun atualizarLocalizacao(local: Local): Result<Unit> = runCatching {
+        val uid = auth.uidLogado() ?: throw IllegalStateException("Não há sessão ativa.")
+        colecao().document(uid).update("localizacao", local).await()
         Unit
     }
 

@@ -2,6 +2,7 @@ package com.cjstudio.start.data.repository
 
 import android.net.Uri
 import com.cjstudio.start.data.model.Passageiro
+import kotlinx.coroutines.flow.Flow
 
 interface IPassageiroRepository {
     // Cadastro completo: cria a conta (quando "senha" vem preenchida; null =
@@ -13,6 +14,9 @@ interface IPassageiroRepository {
     suspend fun buscar(uid: String): Result<Passageiro?>
 
     suspend fun buscarLogado(): Result<Passageiro?>
+
+    // Perfil do passageiro logado em tempo real (corridaAtualId, bloqueio).
+    fun escutarLogado(): Flow<Passageiro?>
 
     // O passageiro logado edita nome, celular e foto (null = mantém). CPF,
     // e-mail e sexo não mudam (firestore.rules).

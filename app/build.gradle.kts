@@ -21,6 +21,14 @@ if (temKeystoreDeRelease) {
 // google-services precisa de app/google-services.json pra sequer configurar.
 // Enquanto o projeto Firebase do Start não existir, o build continua
 // funcionando (só o Firebase não inicializa em tempo de execução).
+// Chave do Google Maps/Places dos apps, lida de local.properties (fora do
+// GitHub). Sem ela o app compila, mas o mapa fica cinza.
+val localProperties = Properties().apply {
+    val arquivo = rootProject.file("local.properties")
+    if (arquivo.exists()) arquivo.inputStream().reader(Charsets.UTF_8).use { load(it) }
+}
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY", "")
+
 val temGoogleServices = file("google-services.json").exists()
 if (temGoogleServices) {
     apply(plugin = "com.google.gms.google-services")
@@ -41,6 +49,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
     }
 
     packaging {
@@ -143,6 +154,12 @@ dependencies {
     implementation(libs.firebase.functions)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.crashlytics)
+
+    // Mapa, localização e busca de endereço (corridas).
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+    implementation(libs.places)
+    implementation(libs.maps.utils)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

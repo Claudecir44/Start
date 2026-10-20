@@ -70,7 +70,7 @@ service cloud.firestore {
         && sexoValido(request.resource.data)
         && cpfReservado('passageiro', uid);
       allow update: if (dono(uid)
-          && !alterados().hasAny(['bloqueado', 'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo']))
+          && !alterados().hasAny(['bloqueado', 'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId']))
         || (ehAdmin() && permissaoAdmin('passageiros') && alterados().hasOnly(['bloqueado']));
       allow delete: if false;
     }
@@ -90,14 +90,15 @@ service cloud.firestore {
         // Foto e celular: livres (nunca situação/contadores/identidade).
         (dono(uid)
           && !alterados().hasAny(['status', 'motivoStatus', 'analisadoPor', 'analisadoEm', 'online',
-                                  'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo'])
+                                  'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo',
+                                  'corridaAtualId'])
           && !alterados().hasAny(camposAnalisados()))
         // Nome, nascimento, CNH ou carro: o admin aprovou esses dados, então
         // mudar qualquer um volta o cadastro pra análise (e sai do ar).
         || (dono(uid)
           && alterados().hasAny(camposAnalisados())
           && !alterados().hasAny(['analisadoPor', 'analisadoEm', 'totalCorridas', 'avaliacaoMedia',
-                                  'cpf', 'email', 'criadoEm', 'sexo'])
+                                  'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId'])
           && request.resource.data.status == 'em_analise'
           && request.resource.data.online == false)
         // Ficar online só aprovado; ficar offline sempre.
@@ -118,6 +119,34 @@ service cloud.firestore {
       // Só a foto, pelo próprio admin. Criar/excluir: só Cloud Function.
       allow update: if dono(uid) && alterados().hasOnly(['fotoUrl']);
       allow create, delete: if false;
+    }
+
+    // ===== Corridas =====
+    // Criar, aceitar e mudar situação/valor: só as Cloud Functions (Admin
+    // SDK). O app só lê e o motorista da corrida atualiza a própria posição.
+    function motoristaAprovado() {
+      return logado()
+        && get(/databases/$(database)/documents/motoristas/$(request.auth.uid)).data.status == 'aprovado';
+    }
+
+    match /corridas/{id} {
+      allow read: if logado() && (
+        resource.data.passageiroId == request.auth.uid
+        || resource.data.motoristaId == request.auth.uid
+        // Motorista aprovado vê as corridas ainda sem motorista (pra aceitar).
+        || (resource.data.status == 'procurando' && motoristaAprovado())
+        || (ehAdmin() && permissaoAdmin('corridas')));
+      allow update: if logado()
+        && resource.data.motoristaId == request.auth.uid
+        && resource.data.status in ['aceita', 'em_andamento']
+        && alterados().hasOnly(['motoristaLocal']);
+      allow create, delete: if false;
+    }
+
+    // ===== Configuração (tarifa) =====
+    match /config/{id} {
+      allow read: if logado();
+      allow write: if ehAdmin() && permissaoAdmin('financeiro');
     }
 
     match /logsAdministracao/{id} {

@@ -106,6 +106,26 @@
             android:text="@string/admin_administradores" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@+id/btnCorridas"
+            style="@style/BotaoPainel"
+            android:layout_marginEnd="8dp"
+            android:text="@string/admin_corridas" />
+
+        <TextView
+            android:id="@+id/btnTarifas"
+            style="@style/BotaoPainel"
+            android:text="@string/admin_tarifas" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tvDica"
         style="@style/TextoCorpo"
@@ -197,6 +217,49 @@
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
 
+
+        <!-- Seção Tarifas: valores usados pelo servidor no preço da corrida. -->
+        <ScrollView
+            android:id="@+id/formTarifa"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="24dp">
+
+                <TextView
+                    style="@style/TextoCorpo"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/tarifa_explicacao" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_bandeirada" />
+                <EditText android:id="@+id/etBandeirada" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_por_km" />
+                <EditText android:id="@+id/etPorKm" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_por_minuto" />
+                <EditText android:id="@+id/etPorMinuto" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_minimo" />
+                <EditText android:id="@+id/etMinimo" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <TextView style="@style/RotuloCampo" android:text="@string/tarifa_raio" />
+                <EditText android:id="@+id/etRaio" style="@style/Campo" android:inputType="numberDecimal" />
+
+                <Button
+                    android:id="@+id/btnSalvarTarifa"
+                    style="@style/BotaoPrimario"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/tarifa_salvar" />
+            </LinearLayout>
+        </ScrollView>
 
         <ProgressBar
             android:id="@+id/progressBar"

@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.cjstudio.start.R
 import com.cjstudio.start.data.model.Passageiro
+import com.cjstudio.start.data.model.Tarifa
+import java.util.Locale
 import com.cjstudio.start.databinding.ActivityPainelAdminBinding
 import com.cjstudio.start.ui.admin.PainelAdminViewModel.FiltroMotorista
 import com.cjstudio.start.ui.admin.PainelAdminViewModel.Secao
@@ -57,6 +59,17 @@ class PainelAdminActivity : AppCompatActivity() {
         binding.btnMotoristas.setOnClickListener { viewModel.abrir(Secao.MOTORISTAS) }
         binding.btnPassageiros.setOnClickListener { viewModel.abrir(Secao.PASSAGEIROS) }
         binding.btnAdministradores.setOnClickListener { viewModel.abrir(Secao.ADMINISTRADORES) }
+        binding.btnCorridas.setOnClickListener { viewModel.abrir(Secao.CORRIDAS) }
+        binding.btnTarifas.setOnClickListener { viewModel.abrir(Secao.TARIFAS) }
+        binding.btnSalvarTarifa.setOnClickListener {
+            viewModel.salvarTarifa(
+                binding.etBandeirada.text.toString(),
+                binding.etPorKm.text.toString(),
+                binding.etPorMinuto.text.toString(),
+                binding.etMinimo.text.toString(),
+                binding.etRaio.text.toString()
+            )
+        }
         binding.btnNovoAdmin.setOnClickListener { startActivity(Intent(this, CadastroAdminActivity::class.java)) }
         binding.chipsFiltro.setOnCheckedStateChangeListener { _, ids ->
             ids.firstOrNull()?.let { id -> chipsFiltro[id]?.let { viewModel.filtrarMotoristas(it) } }
@@ -92,6 +105,8 @@ class PainelAdminActivity : AppCompatActivity() {
             binding.btnMotoristas.visibility = visivel(admin.temPermissao("motoristas"))
             binding.btnPassageiros.visibility = visivel(admin.temPermissao("passageiros"))
             binding.btnAdministradores.visibility = visivel(admin.temPermissao("administradores"))
+            binding.btnCorridas.visibility = visivel(admin.temPermissao("corridas"))
+            binding.btnTarifas.visibility = visivel(admin.temPermissao("financeiro"))
         }
 
         binding.tvBadgeMotoristas.visibility = visivel(estado.motoristasEmAnalise > 0)
@@ -107,6 +122,8 @@ class PainelAdminActivity : AppCompatActivity() {
                 Secao.MOTORISTAS -> R.string.admin_motoristas
                 Secao.PASSAGEIROS -> R.string.admin_passageiros
                 Secao.ADMINISTRADORES -> R.string.admin_administradores
+                Secao.CORRIDAS -> R.string.admin_corridas
+                Secao.TARIFAS -> R.string.admin_tarifas
             }
         )
         binding.tvContador.text = resources.getQuantityString(R.plurals.admin_contador, estado.itens.size, estado.itens.size)
@@ -114,7 +131,13 @@ class PainelAdminActivity : AppCompatActivity() {
         chipsFiltro.entries.firstOrNull { it.value == estado.filtroMotorista }?.let { binding.chipsFiltro.check(it.key) }
         binding.btnNovoAdmin.visibility = visivel(secao == Secao.ADMINISTRADORES)
         binding.progressBar.visibility = visivel(estado.carregando)
-        binding.tvVazio.visibility = visivel(!estado.carregando && estado.itens.isEmpty())
+        val tarifas = secao == Secao.TARIFAS
+        binding.formTarifa.visibility = visivel(tarifas && estado.tarifa != null)
+        binding.rvItens.visibility = visivel(!tarifas)
+        binding.tvContador.visibility = visivel(!tarifas)
+        binding.tvVazio.visibility = visivel(!tarifas && !estado.carregando && estado.itens.isEmpty())
+        binding.btnSalvarTarifa.isEnabled = !estado.salvandoTarifa
+        estado.tarifa?.let { preencherTarifa(it) }
         adapter.submitList(estado.itens)
     }
 
@@ -140,6 +163,20 @@ class PainelAdminActivity : AppCompatActivity() {
             }
             .setNegativeButton(R.string.cancelar, null)
             .show()
+    }
+
+    // Preenche só uma vez por tarifa carregada (não apaga o que está sendo digitado).
+    private var tarifaMostrada: Tarifa? = null
+
+    private fun preencherTarifa(t: Tarifa) {
+        if (t == tarifaMostrada) return
+        tarifaMostrada = t
+        fun num(v: Double) = String.format(Locale("pt", "BR"), "%.2f", v)
+        binding.etBandeirada.setText(num(t.bandeirada))
+        binding.etPorKm.setText(num(t.porKm))
+        binding.etPorMinuto.setText(num(t.porMinuto))
+        binding.etMinimo.setText(num(t.minimo))
+        binding.etRaio.setText(num(t.raioBuscaKm))
     }
 
     private fun visivel(mostrar: Boolean) = if (mostrar) View.VISIBLE else View.GONE

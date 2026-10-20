@@ -4,6 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cjstudio.start.R
 import com.cjstudio.start.data.model.Admin
+import com.cjstudio.start.data.model.Corrida
+import com.cjstudio.start.data.model.StatusCorrida
+import com.cjstudio.start.data.model.Tarifa
+import com.cjstudio.start.data.repository.ICorridaRepository
+import com.cjstudio.start.data.repository.ITarifaRepository
+import com.cjstudio.start.util.MapaUtil
+import java.text.SimpleDateFormat
+import java.util.Locale
 import com.cjstudio.start.data.model.Motorista
 import com.cjstudio.start.data.model.Passageiro
 import com.cjstudio.start.data.model.StatusMotorista
@@ -36,10 +44,12 @@ class PainelAdminViewModel @Inject constructor(
     private val admins: IAdminRepository,
     private val motoristas: IMotoristaRepository,
     private val passageiros: IPassageiroRepository,
+    private val corridas: ICorridaRepository,
+    private val tarifas: ITarifaRepository,
     private val falhas: IFalhasRepository
 ) : ViewModel() {
 
-    enum class Secao { MOTORISTAS, PASSAGEIROS, ADMINISTRADORES }
+    enum class Secao { MOTORISTAS, PASSAGEIROS, ADMINISTRADORES, CORRIDAS, TARIFAS }
 
     // Filtro da seção Motoristas — null = todos.
     enum class FiltroMotorista(val status: String?) {
@@ -56,7 +66,10 @@ class PainelAdminViewModel @Inject constructor(
         val filtroMotorista: FiltroMotorista = FiltroMotorista.EM_ANALISE,
         val itens: List<ItemPessoa> = emptyList(),
         val carregando: Boolean = false,
-        val motoristasEmAnalise: Int = 0
+        val motoristasEmAnalise: Int = 0,
+        // Seção Tarifas: valores atuais (null = ainda carregando).
+        val tarifa: Tarifa? = null,
+        val salvandoTarifa: Boolean = false
     )
 
     sealed interface Evento {
@@ -117,6 +130,11 @@ class PainelAdminViewModel @Inject constructor(
                     lista.map { it.paraItem() }
                 }
                 Secao.ADMINISTRADORES -> admins.listarTodos().map { lista -> lista.map { it.paraItem() } }
+                Secao.CORRIDAS -> corridas.listarTodas().map { lista -> lista.map { it.paraItem() } }
+                Secao.TARIFAS -> tarifas.buscar().map { t ->
+                    _estado.update { it.copy(tarifa = t) }
+                    emptyList()
+                }
             }
             itens.onSuccess { lista -> _estado.update { it.copy(itens = lista, carregando = false) } }
                 .onFailure { e ->
@@ -149,6 +167,23 @@ class PainelAdminViewModel @Inject constructor(
                     abrir(Secao.PASSAGEIROS)
                 }
                 .onFailure { _eventos.send(Evento.Mensagem(it.paraUiTexto())) }
+        }
+    }
+
+    // Valores digitados no formato brasileiro ("4,50"). Todos precisam ser > 0.
+    fun salvarTarifa(bandeirada: String, porKm: String, porMinuto: String, minimo: String, raioKm: String) {
+        val numeros = listOf(bandeirada, porKm, porMinuto, minimo, raioKm).map { it.trim().replace(",", ".").toDoubleOrNull() }
+        if (numeros.any { it == null || it <= 0.0 }) {
+            _eventos.trySend(Evento.Mensagem(texto(R.string.tarifa_erro_valores)))
+            return
+        }
+        val (b, km, min, minimoValor, raio) = numeros.map { it!! }
+        val nova = Tarifa(bandeirada = b, porKm = km, porMinuto = min, minimo = minimoValor, raioBuscaKm = raio)
+        _estado.update { it.copy(salvandoTarifa = true) }
+        viewModelScope.launch {
+            val resultado = tarifas.salvar(nova)
+            _estado.update { it.copy(salvandoTarifa = false, tarifa = if (resultado.isSuccess) nova else it.tarifa) }
+            _eventos.send(Evento.Mensagem(resultado.fold({ texto(R.string.tarifa_salva) }, { it.paraUiTexto() })))
         }
     }
 
@@ -195,6 +230,26 @@ class PainelAdminViewModel @Inject constructor(
         corSelo = if (bloqueado) R.color.vermelho else null
     )
 
+    private fun Corrida.paraItem(): ItemPessoa {
+        val (selo, cor) = when (status) {
+            StatusCorrida.PROCURANDO -> R.string.situacao_corrida_procurando to R.color.amarelo
+            StatusCorrida.ACEITA -> R.string.situacao_corrida_aceita to R.color.amarelo
+            StatusCorrida.EM_ANDAMENTO -> R.string.situacao_corrida_em_andamento to R.color.verde
+            StatusCorrida.FINALIZADA -> R.string.situacao_corrida_finalizada to R.color.verde
+            else -> R.string.situacao_corrida_cancelada to R.color.vermelho
+        }
+        val quando = criadaEm?.let { DATA_HORA.format(it) }.orEmpty()
+        return ItemPessoa(
+            id = id.orEmpty(),
+            nome = "${MapaUtil.valor(valor)}  ·  ${passageiroNome.orEmpty()}",
+            linha2 = "${origem?.endereco.orEmpty()}  →  ${destino?.endereco.orEmpty()}",
+            linha3 = listOfNotNull(quando, motoristaNome?.let { "Motorista: $it" }).joinToString("  ·  "),
+            fotoUrl = passageiroFotoUrl,
+            selo = selo,
+            corSelo = cor
+        )
+    }
+
     private fun Admin.paraItem() = ItemPessoa(
         id = id.orEmpty(),
         nome = nomeCompleto,
@@ -208,4 +263,8 @@ class PainelAdminViewModel @Inject constructor(
         },
         corSelo = R.color.amarelo
     )
+
+    private companion object {
+        val DATA_HORA = SimpleDateFormat("dd/MM HH:mm", Locale("pt", "BR"))
+    }
 }

@@ -36,6 +36,12 @@ data class Motorista(
     // Disponível pra receber corrida agora. Só tem efeito com status APROVADO.
     var online: Boolean = false,
 
+    // Última posição enviada pelo app enquanto online (corridas próximas).
+    var localizacao: Local? = null,
+
+    // Corrida aceita em andamento — só o servidor grava.
+    var corridaAtualId: String? = null,
+
     var totalCorridas: Int = 0,
     var avaliacaoMedia: Double = 0.0,
 

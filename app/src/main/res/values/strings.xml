@@ -100,7 +100,6 @@
     <string name="home_ola">Olá, %1$s!</string>
     <string name="home_para_onde">Para onde vamos?</string>
     <string name="home_para_onde_dica">Toque para escolher o destino</string>
-    <string name="em_breve_corridas">Pedir corridas chega na próxima atualização do Start.</string>
     <string name="status_em_analise">Cadastro em análise</string>
     <string name="status_em_analise_msg">Estamos conferindo seus documentos. Assim que for aprovado, esta tela muda sozinha e você já pode ficar online.</string>
     <string name="status_aprovado">Aprovado</string>
@@ -131,6 +130,52 @@ Sexo: %3$s
     <string name="editar_nova_analise_msg">Você mudou dados conferidos na aprovação (nome, nascimento, CNH ou carro). O cadastro volta para análise e você fica offline até ser aprovado de novo.</string>
     <string name="editar_nova_analise_sim">Enviar</string>
 
+    <!-- Corridas -->
+    <string name="corrida_partida">Partida</string>
+    <string name="corrida_destino">Para onde?</string>
+    <string name="corrida_usar_minha_localizacao">Usar minha localização como partida</string>
+    <string name="corrida_sem_localizacao">Ative a localização do celular para usar o mapa.</string>
+    <string name="corrida_resumo">%1$s · %2$s</string>
+    <string name="corrida_pagamento_direto">Pagamento direto ao motorista (dinheiro ou Pix)</string>
+    <string name="corrida_pedir">Pedir corrida</string>
+    <string name="corrida_pedindo">Pedindo…</string>
+    <string name="corrida_trocar_destino">Trocar endereços</string>
+    <string name="corrida_ligar">Ligar</string>
+    <string name="corrida_passageiro">Passageiro</string>
+    <string name="corrida_cancelar">Cancelar corrida</string>
+    <string name="corrida_manter">Manter</string>
+    <string name="corrida_cancelar_titulo">Cancelar a corrida?</string>
+    <string name="corrida_cancelar_msg">O motorista é avisado na hora.</string>
+    <string name="corrida_cancelada">Corrida cancelada</string>
+    <string name="corrida_cancelada_por_voce">Você cancelou esta corrida.</string>
+    <string name="corrida_cancelada_pelo_motorista">O motorista cancelou. Você pode pedir outra corrida.</string>
+    <string name="corrida_cancelada_pelo_passageiro">O passageiro cancelou a corrida.</string>
+    <string name="corrida_p_procurando">Procurando motorista…</string>
+    <string name="corrida_p_procurando_msg">Avisamos os motoristas mais perto de você.</string>
+    <string name="corrida_p_a_caminho">Motorista a caminho</string>
+    <string name="corrida_p_a_caminho_msg">Espere no local de partida. Confira a placa antes de entrar.</string>
+    <string name="corrida_p_em_viagem">Em viagem</string>
+    <string name="corrida_p_em_viagem_msg">Boa viagem! Você pode acompanhar o caminho no mapa.</string>
+    <string name="corrida_p_finalizada">Você chegou!</string>
+    <string name="corrida_p_finalizada_msg">Pague %1$s ao motorista (dinheiro ou Pix).</string>
+    <string name="corrida_m_buscar">Buscar passageiro</string>
+    <string name="corrida_m_buscar_msg">Vá até o ponto de partida. Toque em \"Passageiro embarcou\" quando ele entrar.</string>
+    <string name="corrida_m_em_viagem">Levando o passageiro</string>
+    <string name="corrida_m_em_viagem_msg">Siga até o destino e finalize a corrida ao chegar.</string>
+    <string name="corrida_m_finalizada">Corrida finalizada</string>
+    <string name="corrida_m_finalizada_msg">Receba %1$s do passageiro (dinheiro ou Pix).</string>
+    <string name="corrida_m_navegar_partida">Navegar até o passageiro</string>
+    <string name="corrida_m_navegar_destino">Navegar até o destino</string>
+    <string name="corrida_m_embarcou">Passageiro embarcou</string>
+    <string name="corrida_m_finalizar">Finalizar corrida</string>
+    <string name="corrida_m_finalizar_msg">Finalizar e receber %1$s do passageiro (dinheiro ou Pix)?</string>
+    <string name="corrida_m_cancelar_msg">O passageiro é avisado na hora e pode pedir outro motorista.</string>
+    <string name="oferta_titulo">Nova corrida</string>
+    <string name="oferta_resumo">%1$s até a partida · viagem de %2$s (%3$s)</string>
+    <string name="oferta_aceitar">Aceitar</string>
+    <string name="oferta_aceitando">Aceitando…</string>
+    <string name="oferta_recusar">Recusar</string>
+
     <!-- Admin -->
     <string name="admin_cadastrar">Cadastrar administrador</string>
     <string name="admin_novo_titulo">Novo administrador</string>
@@ -150,6 +195,22 @@ Sexo: %3$s
     <string name="admin_motoristas">Motoristas</string>
     <string name="admin_passageiros">Passageiros</string>
     <string name="admin_administradores">Administradores</string>
+    <string name="admin_corridas">Corridas</string>
+    <string name="admin_tarifas">Tarifas</string>
+    <string name="situacao_corrida_procurando">Procurando</string>
+    <string name="situacao_corrida_aceita">A caminho</string>
+    <string name="situacao_corrida_em_andamento">Em viagem</string>
+    <string name="situacao_corrida_finalizada">Finalizada</string>
+    <string name="situacao_corrida_cancelada">Cancelada</string>
+    <string name="tarifa_explicacao">Preço da corrida = bandeirada + (km × preço por km) + (minutos × preço por minuto), nunca abaixo do mínimo. O valor é arredondado para cima nos 50 centavos. Vale para as próximas corridas.</string>
+    <string name="tarifa_bandeirada">Bandeirada (R$)</string>
+    <string name="tarifa_por_km">Preço por km (R$)</string>
+    <string name="tarifa_por_minuto">Preço por minuto (R$)</string>
+    <string name="tarifa_minimo">Preço mínimo da corrida (R$)</string>
+    <string name="tarifa_raio">Raio de busca de motoristas (km)</string>
+    <string name="tarifa_salvar">Salvar tarifas</string>
+    <string name="tarifa_salva">Tarifas salvas. Já valem para as próximas corridas.</string>
+    <string name="tarifa_erro_valores">Preencha todos os valores com números maiores que zero.</string>
     <string name="admin_dica">Escolha uma seção acima.\n\nMotoristas novos chegam como "Em análise": confira os documentos e aprove para que possam receber corridas.</string>
     <string name="admin_nenhum">Nada por aqui.</string>
     <string name="admin_novo_admin">+ Novo administrador</string>

@@ -20,7 +20,11 @@ data class Passageiro(
     // Só o admin muda (firestore.rules). Passageiro bloqueado não entra.
     var bloqueado: Boolean = false,
 
-    // Mantidos pelo servidor quando as corridas existirem (fase 2).
+    // Corrida em andamento (procurando/aceita/em_andamento) — só o servidor
+    // grava (pedirCorrida/acaoCorrida); o app escuta pra abrir a corrida.
+    var corridaAtualId: String? = null,
+
+    // Mantidos pelo servidor.
     var totalCorridas: Int = 0,
     var avaliacaoMedia: Double = 0.0,
 

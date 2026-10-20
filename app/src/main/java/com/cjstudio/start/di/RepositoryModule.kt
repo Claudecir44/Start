@@ -3,6 +3,14 @@ package com.cjstudio.start.di
 import com.cjstudio.start.data.repository.AdminRepository
 import com.cjstudio.start.data.repository.ArquivoRepository
 import com.cjstudio.start.data.repository.AuthRepository
+import com.cjstudio.start.data.repository.CorridaRepository
+import com.cjstudio.start.data.repository.EnderecoRepository
+import com.cjstudio.start.data.repository.ICorridaRepository
+import com.cjstudio.start.data.repository.IEnderecoRepository
+import com.cjstudio.start.data.repository.ILocalizacaoRepository
+import com.cjstudio.start.data.repository.ITarifaRepository
+import com.cjstudio.start.data.repository.LocalizacaoRepository
+import com.cjstudio.start.data.repository.TarifaRepository
 import com.cjstudio.start.data.repository.FalhasRepository
 import com.cjstudio.start.data.repository.IAdminRepository
 import com.cjstudio.start.data.repository.IArquivoRepository
@@ -45,4 +53,20 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindFalhasRepository(impl: FalhasRepository): IFalhasRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindCorridaRepository(impl: CorridaRepository): ICorridaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTarifaRepository(impl: TarifaRepository): ITarifaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLocalizacaoRepository(impl: LocalizacaoRepository): ILocalizacaoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindEnderecoRepository(impl: EnderecoRepository): IEnderecoRepository
 }

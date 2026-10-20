@@ -4,6 +4,9 @@ import android.net.Uri
 import com.cjstudio.start.data.model.Passageiro
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Provider
@@ -51,6 +54,23 @@ class PassageiroRepository @Inject constructor(
     override suspend fun buscarLogado(): Result<Passageiro?> {
         val uid = auth.uidLogado() ?: return Result.failure(IllegalStateException("Não há sessão ativa."))
         return buscar(uid)
+    }
+
+    override fun escutarLogado(): Flow<Passageiro?> = callbackFlow {
+        val uid = auth.uidLogado()
+        if (uid == null) {
+            trySend(null)
+            close()
+            return@callbackFlow
+        }
+        val registro = colecao().document(uid).addSnapshotListener { doc, erro ->
+            if (erro != null) {
+                close(erro)
+                return@addSnapshotListener
+            }
+            trySend(doc?.toObject(Passageiro::class.java)?.also { it.id = doc.id })
+        }
+        awaitClose { registro.remove() }
     }
 
     override suspend fun atualizarPerfil(nomeCompleto: String, telefone: String, novaFoto: Uri?): Result<Unit> = runCatching {

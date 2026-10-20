@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Espaço do mapa coberto pelo topo e pelo painel de baixo (o Google
+         Maps centraliza e põe o logo dentro da área livre). -->
+    <dimen name="folga_topo_mapa">110dp</dimen>
+    <dimen name="folga_painel_mapa">230dp</dimen>
+    <dimen name="folga_enquadrar">90dp</dimen>
+
+    <dimen name="folga_painel_corrida">330dp</dimen>
+</resources>

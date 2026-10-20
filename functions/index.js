@@ -1,7 +1,8 @@
 // Cloud Functions do Start (passageiro, motorista e admin no mesmo projeto
-// Firebase: start-3835f). Fase 1: só o cadastro de administradores — o
-// resto (aprovar motorista, bloquear passageiro) é gravação direta,
-// protegida por firestore.rules.
+// Firebase: start-3835f): cadastro de administradores e o ciclo da corrida
+// (estimar, pedir, aceitar, embarcar, finalizar, cancelar). O resto
+// (aprovar motorista, bloquear passageiro) é gravação direta, protegida por
+// firestore.rules.
 require('dotenv').config();
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
@@ -187,3 +188,11 @@ exports.cadastrarAdmin = onCall(async (request) => {
     await registrarLog('cadastrarAdmin', uidChamador, { uid, email, role });
     return { uid };
 });
+
+// Ciclo da corrida (estimar, pedir, aceitar, embarcar, finalizar, cancelar).
+// Carregado depois do setGlobalOptions pra herdar região e conta de execução.
+const corridas = require("./corridas");
+exports.estimarCorrida = corridas.estimarCorrida;
+exports.pedirCorrida = corridas.pedirCorrida;
+exports.aceitarCorrida = corridas.aceitarCorrida;
+exports.acaoCorrida = corridas.acaoCorrida;

@@ -2,6 +2,7 @@ package com.cjstudio.start.data.repository
 
 import android.net.Uri
 import com.cjstudio.start.data.model.EdicaoMotorista
+import com.cjstudio.start.data.model.Local
 import com.cjstudio.start.data.model.Motorista
 import kotlinx.coroutines.flow.Flow
 
@@ -28,6 +29,9 @@ interface IMotoristaRepository {
     // Disponível (ou não) pra receber corridas. firestore.rules só aceita
     // "true" com o cadastro aprovado.
     suspend fun definirOnline(online: Boolean): Result<Unit>
+
+    // Posição atual do motorista online (pra ver corridas perto dele).
+    suspend fun atualizarLocalizacao(local: Local): Result<Unit>
 
     // ===== Admin =====
     suspend fun listarTodos(): Result<List<Motorista>>

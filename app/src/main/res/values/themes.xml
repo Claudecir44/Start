@@ -93,4 +93,24 @@
         <item name="chipBackgroundColor">@color/chip_fundo</item>
         <item name="android:textColor">@color/chip_texto</item>
     </style>
+    <!-- Título pequeno acima de um campo do formulário. -->
+    <style name="RotuloCampo">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:textColor">@color/texto_secundario</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!-- Endereço de partida/destino com o pino colorido na frente. -->
+    <style name="LinhaEndereco">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:drawablePadding">10dp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:textSize">14sp</item>
+    </style>
 </resources>

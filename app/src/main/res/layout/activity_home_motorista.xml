@@ -1,48 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Mapa de fundo, topo por cima e, embaixo: situação do cadastro (fora do
+     Aprovado), a corrida oferecida e o botão Ficar online/offline. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fundo"
-    android:orientation="vertical">
+    android:background="@color/fundo">
 
-    <include
-        android:id="@+id/cabecalho"
-        layout="@layout/include_cabecalho_usuario" />
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mapa"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <!-- Só aparece fora do "Aprovado" (em análise, reprovado, bloqueado). -->
     <LinearLayout
-        android:id="@+id/cardSituacao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/bg_cartao"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/cabecalho"
+            layout="@layout/include_cabecalho_usuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_cabecalho_mapa" />
+
+        <!-- Só aparece fora do "Aprovado" (em análise, reprovado, bloqueado). -->
+        <LinearLayout
+            android:id="@+id/cardSituacao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/bg_cartao"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/tvStatusMensagem"
+                style="@style/TextoCorpo" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_painel_inferior"
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Corrida mais próxima esperando motorista. -->
+        <LinearLayout
+            android:id="@+id/cardOferta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="14dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/oferta_titulo"
+                    android:textColor="@color/amarelo"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvOfertaValor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/amarelo"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvOfertaResumo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/texto_secundario"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvOfertaPartida"
+                style="@style/LinhaEndereco"
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_ponto_partida" />
+
+            <TextView
+                android:id="@+id/tvOfertaDestino"
+                style="@style/LinhaEndereco"
+                android:layout_marginTop="8dp"
+                android:drawableStart="@drawable/ic_ponto_destino" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnRecusar"
+                    style="@style/BotaoContorno"
+                    android:layout_width="0dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:text="@string/oferta_recusar" />
+
+                <Button
+                    android:id="@+id/btnAceitar"
+                    style="@style/BotaoPrimario"
+                    android:layout_width="0dp"
+                    android:layout_weight="1.4"
+                    android:text="@string/oferta_aceitar" />
+            </LinearLayout>
+        </LinearLayout>
+
         <TextView
-            android:id="@+id/tvStatusMensagem"
-            style="@style/TextoCorpo" />
+            android:id="@+id/tvSituacaoOnline"
+            style="@style/TextoCorpo"
+            android:layout_marginBottom="12dp"
+            android:gravity="center"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnOnline"
+            style="@style/BotaoPrimario"
+            android:visibility="gone" />
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/tvSituacaoOnline"
-        style="@style/TextoCorpo"
-        android:layout_marginBottom="12dp"
-        android:gravity="center"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/btnOnline"
-        style="@style/BotaoPrimario"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="28dp"
-        android:visibility="gone" />
-</LinearLayout>
+</FrameLayout>
