@@ -46,6 +46,10 @@
         <activity
             android:name=".ui.motorista.HomeMotoristaActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.motorista.EditarMotoristaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- ===== Admin ===== -->
         <activity

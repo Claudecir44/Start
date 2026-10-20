@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
@@ -119,41 +118,23 @@ class CadastroMotoristaViewModel @Inject constructor(
         }
     }
 
+    // Conta (e-mail/senha), CPF, sexo, fotos e termos aqui; o resto é regra
+    // de motorista, igual na edição (ValidacaoMotorista).
     private fun validar(form: Formulario): UiTexto? {
         val fotos = _fotos.value
-        val ano = form.ano.toIntOrNull()
-        val anoAtual = Calendar.getInstance().get(Calendar.YEAR)
-        val idade = Validacao.idade(form.dataNascimento)
         return when {
             Foto.PERFIL !in fotos -> texto(R.string.cadastro_erro_foto)
-            !Validacao.nomeCompleto(form.nomeCompleto) -> texto(R.string.cadastro_erro_nome)
             !CpfUtil.valido(form.cpf) -> texto(R.string.cadastro_erro_cpf)
-            idade == null -> texto(R.string.motorista_erro_nascimento)
-            idade < IDADE_MINIMA -> texto(R.string.motorista_erro_idade, IDADE_MINIMA)
-            !Validacao.telefone(form.telefone) -> texto(R.string.cadastro_erro_telefone)
             form.sexo == null -> texto(R.string.cadastro_erro_sexo)
             !completandoCadastro && !Validacao.email(form.email.trim()) -> texto(R.string.cadastro_erro_email)
             !completandoCadastro && !Validacao.senha(form.senha) -> texto(R.string.cadastro_erro_senha)
             !completandoCadastro && form.senha != form.confirmarSenha -> texto(R.string.cadastro_erro_senhas_diferentes)
-            !Validacao.cnh(form.cnhNumero) -> texto(R.string.motorista_erro_cnh)
-            form.cnhCategoria.isBlank() -> texto(R.string.motorista_erro_cnh_categoria)
-            !Validacao.dataFutura(form.cnhValidade) -> texto(R.string.motorista_erro_cnh_validade)
-            Foto.CNH !in fotos -> texto(R.string.motorista_erro_foto_cnh)
-            form.marca.isBlank() || form.modelo.isBlank() || form.cor.isBlank() -> texto(R.string.motorista_erro_veiculo)
-            ano == null || ano > anoAtual + 1 -> texto(R.string.motorista_erro_ano)
-            ano < anoAtual - IDADE_MAXIMA_VEICULO -> texto(R.string.motorista_erro_ano_antigo, anoAtual - IDADE_MAXIMA_VEICULO)
-            !Validacao.placa(form.placa) -> texto(R.string.motorista_erro_placa)
-            Foto.CRLV !in fotos -> texto(R.string.motorista_erro_foto_crlv)
-            !form.aceitouTermos -> texto(R.string.cadastro_erro_termos)
-            else -> null
+            else -> ValidacaoMotorista.validar(form.dadosMotorista(), Foto.CNH in fotos, Foto.CRLV in fotos)
+                ?: if (!form.aceitouTermos) texto(R.string.cadastro_erro_termos) else null
         }
     }
 
-    companion object {
-        const val IDADE_MINIMA = 21
-        const val IDADE_MAXIMA_VEICULO = 15
-
-        // Categorias da CNH que permitem dirigir carro de passeio.
-        val CATEGORIAS_CNH = listOf("B", "AB", "C", "AC", "D", "AD", "E", "AE")
-    }
+    private fun Formulario.dadosMotorista() = ValidacaoMotorista.Dados(
+        nomeCompleto, dataNascimento, telefone, cnhNumero, cnhCategoria, cnhValidade, marca, modelo, ano, cor, placa
+    )
 }

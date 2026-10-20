@@ -1,6 +1,7 @@
 package com.cjstudio.start.data.repository
 
 import android.net.Uri
+import com.cjstudio.start.data.model.EdicaoMotorista
 import com.cjstudio.start.data.model.Motorista
 import com.cjstudio.start.data.model.StatusMotorista
 import com.google.firebase.firestore.FieldValue
@@ -77,6 +78,37 @@ class MotoristaRepository @Inject constructor(
             trySend(doc?.toObject(Motorista::class.java)?.also { it.id = doc.id })
         }
         awaitClose { registro.remove() }
+    }
+
+    override suspend fun atualizarPerfil(edicao: EdicaoMotorista): Result<Boolean> = runCatching {
+        val uid = auth.uidLogado() ?: throw IllegalStateException("Não há sessão ativa.")
+        val atual = buscar(uid).getOrThrow() ?: throw IllegalStateException("Cadastro não encontrado.")
+        val novaAnalise = edicao.exigeNovaAnalise(atual)
+
+        val dados = mutableMapOf<String, Any?>(
+            "nomeCompleto" to edicao.nomeCompleto,
+            "telefone" to edicao.telefone,
+            "dataNascimento" to edicao.dataNascimento,
+            "cnhNumero" to edicao.cnhNumero,
+            "cnhCategoria" to edicao.cnhCategoria,
+            "cnhValidade" to edicao.cnhValidade,
+            "veiculo" to edicao.veiculo
+        )
+        edicao.novaFoto?.let { dados["fotoUrl"] = arquivos.enviarImagem("fotos_perfil/$uid", it).getOrThrow() }
+        edicao.novaFotoCnh?.let { dados["cnhFotoUrl"] = arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() }
+        edicao.novaFotoCrlv?.let { dados["crlvFotoUrl"] = arquivos.enviarImagem("documentos_motorista/$uid", it).getOrThrow() }
+
+        if (novaAnalise) {
+            dados["status"] = StatusMotorista.EM_ANALISE
+            dados["motivoStatus"] = null
+            dados["online"] = false
+        } else {
+            // Campos iguais aos atuais ficam de fora: a regra só deixa passar
+            // foto/celular sem nova análise.
+            listOf("nomeCompleto", "dataNascimento", "cnhNumero", "cnhCategoria", "cnhValidade", "veiculo").forEach { dados.remove(it) }
+        }
+        etapa("salvar perfil") { colecao().document(uid).update(dados).await() }
+        novaAnalise
     }
 
     override suspend fun definirOnline(online: Boolean): Result<Unit> = runCatching {

@@ -31,6 +31,12 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
 
+    // Dados do motorista conferidos pelo admin na aprovação.
+    function camposAnalisados() {
+      return ['nomeCompleto', 'dataNascimento', 'cnhNumero', 'cnhCategoria', 'cnhValidade',
+              'cnhFotoUrl', 'veiculo', 'crlvFotoUrl'];
+    }
+
     function sexoValido(d) {
       return d.sexo in ['homem', 'mulher'];
     }
@@ -81,10 +87,19 @@ service cloud.firestore {
         && sexoValido(request.resource.data)
         && cpfReservado('motorista', uid);
       allow update: if
-        // Dados do próprio perfil (nunca situação/contadores/identidade).
+        // Foto e celular: livres (nunca situação/contadores/identidade).
         (dono(uid)
           && !alterados().hasAny(['status', 'motivoStatus', 'analisadoPor', 'analisadoEm', 'online',
-                                  'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo']))
+                                  'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo'])
+          && !alterados().hasAny(camposAnalisados()))
+        // Nome, nascimento, CNH ou carro: o admin aprovou esses dados, então
+        // mudar qualquer um volta o cadastro pra análise (e sai do ar).
+        || (dono(uid)
+          && alterados().hasAny(camposAnalisados())
+          && !alterados().hasAny(['analisadoPor', 'analisadoEm', 'totalCorridas', 'avaliacaoMedia',
+                                  'cpf', 'email', 'criadoEm', 'sexo'])
+          && request.resource.data.status == 'em_analise'
+          && request.resource.data.online == false)
         // Ficar online só aprovado; ficar offline sempre.
         || (dono(uid) && alterados().hasOnly(['online'])
           && (request.resource.data.online == false || resource.data.status == 'aprovado'))

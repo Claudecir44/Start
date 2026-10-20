@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nascimento, CNH e carro: iguais no cadastro e na edição do motorista
+     (ver ValidacaoMotorista/FormularioMotorista.kt). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/etNascimento"
+        style="@style/Campo"
+        android:hint="@string/data_nascimento"
+        android:inputType="number" />
+
+    <!-- CNH -->
+    <TextView
+        style="@style/TituloSecao"
+        android:text="@string/motorista_cnh" />
+
+    <EditText
+        android:id="@+id/etCnhNumero"
+        style="@style/Campo"
+        android:hint="@string/motorista_cnh_numero"
+        android:inputType="number"
+        android:maxLength="11" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/spCnhCategoria"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_campo"
+            android:paddingStart="8dp"
+            android:popupBackground="@color/superficie_alta" />
+
+        <EditText
+            android:id="@+id/etCnhValidade"
+            style="@style/Campo"
+            android:layout_width="0dp"
+            android:layout_weight="1.4"
+            android:hint="@string/motorista_cnh_validade"
+            android:inputType="number" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/fotoCnh"
+        layout="@layout/include_foto_documento" />
+
+    <!-- Veículo -->
+    <TextView
+        style="@style/TituloSecao"
+        android:text="@string/motorista_veiculo" />
+
+    <EditText
+        android:id="@+id/etMarca"
+        style="@style/Campo"
+        android:hint="@string/motorista_marca"
+        android:inputType="textCapWords" />
+
+    <EditText
+        android:id="@+id/etModelo"
+        style="@style/Campo"
+        android:hint="@string/motorista_modelo"
+        android:inputType="textCapWords" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etAno"
+            style="@style/Campo"
+            android:layout_width="0dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:hint="@string/motorista_ano"
+            android:inputType="number"
+            android:maxLength="4" />
+
+        <EditText
+            android:id="@+id/etCor"
+            style="@style/Campo"
+            android:layout_width="0dp"
+            android:layout_weight="1.4"
+            android:hint="@string/motorista_cor"
+            android:inputType="textCapWords" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/etPlaca"
+        style="@style/Campo"
+        android:hint="@string/motorista_placa"
+        android:inputType="textCapCharacters|textNoSuggestions" />
+
+    <include
+        android:id="@+id/fotoCrlv"
+        layout="@layout/include_foto_documento" />
+</LinearLayout>

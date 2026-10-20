@@ -115,6 +115,22 @@
     <string name="motorista_online_msg">Você está online. As corridas vão aparecer aqui.</string>
     <string name="motorista_offline_msg">Você está offline e não recebe corridas.</string>
 
+    <!-- Editar cadastro do motorista -->
+    <string name="editar_titulo">Meu cadastro</string>
+    <string name="editar_meu_cadastro">Meu cadastro</string>
+    <string name="editar_trocar_foto">Toque para trocar sua foto</string>
+    <string name="editar_aviso">Foto e celular mudam na hora. Se mudar nome, nascimento, CNH ou carro, o cadastro volta para análise e você fica offline até ser aprovado de novo.</string>
+    <string name="editar_dados_fixos">CPF: %1$s
+E-mail: %2$s
+Sexo: %3$s
+(para mudar estes dados, fale com o suporte)</string>
+    <string name="editar_salvar">Salvar alterações</string>
+    <string name="editar_salvo">Cadastro atualizado.</string>
+    <string name="editar_salvo_em_analise">Cadastro atualizado e enviado para análise.</string>
+    <string name="editar_nova_analise_titulo">Enviar para nova análise?</string>
+    <string name="editar_nova_analise_msg">Você mudou dados conferidos na aprovação (nome, nascimento, CNH ou carro). O cadastro volta para análise e você fica offline até ser aprovado de novo.</string>
+    <string name="editar_nova_analise_sim">Enviar</string>
+
     <!-- Admin -->
     <string name="admin_cadastrar">Cadastrar administrador</string>
     <string name="admin_novo_titulo">Novo administrador</string>

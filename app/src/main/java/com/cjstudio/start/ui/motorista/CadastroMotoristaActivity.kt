@@ -2,12 +2,10 @@ package com.cjstudio.start.ui.motorista
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ArrayAdapter
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import coil3.load
 import com.cjstudio.start.R
 import com.cjstudio.start.databinding.ActivityCadastroMotoristaBinding
 import com.cjstudio.start.ui.common.Navegacao
@@ -21,8 +19,6 @@ import com.cjstudio.start.ui.motorista.CadastroMotoristaViewModel.Foto
 import com.cjstudio.start.util.FotoUtil
 import com.cjstudio.start.util.ajustarPaddingParaTeclado
 import com.cjstudio.start.util.carregarFotoRedonda
-import com.cjstudio.start.util.mascaraData
-import com.cjstudio.start.util.mascaraPlaca
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -44,34 +40,20 @@ class CadastroMotoristaActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.scrollRoot.ajustarPaddingParaTeclado()
         binding.dados.configurar(viewModel.completandoCadastro)
-        binding.etNascimento.mascaraData()
-        binding.etCnhValidade.mascaraData()
-        binding.etPlaca.mascaraPlaca()
-        binding.spCnhCategoria.adapter = ArrayAdapter(
-            this, R.layout.item_spinner, listOf(getString(R.string.motorista_cnh_categoria_hint)) + CadastroMotoristaViewModel.CATEGORIAS_CNH
-        ).apply { setDropDownViewResource(R.layout.item_spinner_dropdown) }
+        binding.motorista.configurar()
 
         binding.topo.tvTitulo.setText(R.string.cadastro_titulo_motorista)
-        binding.fotoCnh.tvDocumento.setText(R.string.motorista_foto_cnh)
-        binding.fotoCrlv.tvDocumento.setText(R.string.motorista_foto_crlv)
         binding.topo.btnVoltar.setOnClickListener { finish() }
         binding.foto.ivFoto.setOnClickListener { escolher(Foto.PERFIL) }
         binding.foto.tvEscolherFoto.setOnClickListener { escolher(Foto.PERFIL) }
-        binding.fotoCnh.root.setOnClickListener { escolher(Foto.CNH) }
-        binding.fotoCrlv.root.setOnClickListener { escolher(Foto.CRLV) }
+        binding.motorista.fotoCnh.root.setOnClickListener { escolher(Foto.CNH) }
+        binding.motorista.fotoCrlv.root.setOnClickListener { escolher(Foto.CRLV) }
         binding.envio.tvTermos.setOnClickListener { abrirTermos() }
         binding.envio.btnCadastrar.setOnClickListener { enviar() }
 
         coletar(viewModel.fotos) { fotos ->
             fotos[Foto.PERFIL]?.let { binding.foto.ivFoto.carregarFotoRedonda(it.toString()) }
-            fotos[Foto.CNH]?.let {
-                binding.fotoCnh.ivDocumento.load(it)
-                binding.fotoCnh.tvDocumento.setText(R.string.motorista_foto_trocar)
-            }
-            fotos[Foto.CRLV]?.let {
-                binding.fotoCrlv.ivDocumento.load(it)
-                binding.fotoCrlv.tvDocumento.setText(R.string.motorista_foto_trocar)
-            }
+            binding.motorista.mostrarFotoNova(fotos[Foto.CNH], fotos[Foto.CRLV])
         }
         coletar(viewModel.enviando) { enviando ->
             binding.envio.progressBar.visibility = if (enviando) View.VISIBLE else View.GONE
@@ -95,26 +77,25 @@ class CadastroMotoristaActivity : AppCompatActivity() {
 
     private fun enviar() {
         val d = binding.dados
-        // Posição 0 do spinner é o texto "Categoria".
-        val categoria = if (binding.spCnhCategoria.selectedItemPosition > 0) binding.spCnhCategoria.selectedItem.toString() else ""
+        val m = binding.motorista
         viewModel.cadastrar(
             CadastroMotoristaViewModel.Formulario(
                 nomeCompleto = d.etNome.text.toString(),
                 cpf = d.etCpf.text.toString(),
-                dataNascimento = binding.etNascimento.text.toString(),
+                dataNascimento = m.etNascimento.text.toString(),
                 telefone = d.etTelefone.text.toString(),
                 email = d.etEmail.text.toString(),
                 senha = d.etSenha.text.toString(),
                 confirmarSenha = d.etConfirmarSenha.text.toString(),
                 sexo = d.sexoSelecionado(),
-                cnhNumero = binding.etCnhNumero.text.toString(),
-                cnhCategoria = categoria,
-                cnhValidade = binding.etCnhValidade.text.toString(),
-                marca = binding.etMarca.text.toString(),
-                modelo = binding.etModelo.text.toString(),
-                ano = binding.etAno.text.toString(),
-                cor = binding.etCor.text.toString(),
-                placa = binding.etPlaca.text.toString(),
+                cnhNumero = m.etCnhNumero.text.toString(),
+                cnhCategoria = m.categoriaSelecionada(),
+                cnhValidade = m.etCnhValidade.text.toString(),
+                marca = m.etMarca.text.toString(),
+                modelo = m.etModelo.text.toString(),
+                ano = m.etAno.text.toString(),
+                cor = m.etCor.text.toString(),
+                placa = m.etPlaca.text.toString(),
                 aceitouTermos = binding.envio.cbTermos.isChecked
             )
         )

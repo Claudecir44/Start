@@ -1,5 +1,6 @@
 package com.cjstudio.start.ui.motorista
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -28,6 +29,11 @@ class HomeMotoristaActivity : AppCompatActivity() {
 
         binding.cabecalho.btnSair.setOnClickListener { viewModel.sair() }
         binding.btnOnline.setOnClickListener { viewModel.alternarOnline() }
+        val abrirCadastro = View.OnClickListener {
+            startActivity(Intent(this, EditarMotoristaActivity::class.java))
+        }
+        binding.btnMeuCadastro.setOnClickListener(abrirCadastro)
+        binding.cabecalho.ivFoto.setOnClickListener(abrirCadastro)
 
         coletar(viewModel.motorista) { motorista -> if (motorista != null) mostrar(motorista) }
         coletar(viewModel.eventos) { evento ->
