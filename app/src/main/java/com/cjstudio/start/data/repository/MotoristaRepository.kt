@@ -53,7 +53,7 @@ class MotoristaRepository @Inject constructor(
     }
 
     override suspend fun buscar(uid: String): Result<Motorista?> = runCatching {
-        val doc = colecao().document(uid).get().await()
+        val doc = etapa("ler perfil") { colecao().document(uid).get().await() }
         doc.toObject(Motorista::class.java)?.also { it.id = doc.id }
     }
 

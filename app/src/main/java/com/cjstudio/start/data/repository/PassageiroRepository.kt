@@ -44,7 +44,7 @@ class PassageiroRepository @Inject constructor(
     }
 
     override suspend fun buscar(uid: String): Result<Passageiro?> = runCatching {
-        val doc = colecao().document(uid).get().await()
+        val doc = etapa("ler perfil") { colecao().document(uid).get().await() }
         doc.toObject(Passageiro::class.java)?.also { it.id = doc.id }
     }
 

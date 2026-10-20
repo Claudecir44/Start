@@ -10,6 +10,7 @@ import com.cjstudio.start.data.model.EmailJaCadastradoException
 import com.cjstudio.start.data.model.EmailNaoVerificadoException
 import com.cjstudio.start.data.model.PerfilJaExisteException
 import com.cjstudio.start.data.model.PerfilNaoEncontradoException
+import com.cjstudio.start.data.repository.TempoEsgotadoException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -39,6 +40,7 @@ fun Throwable.paraUiTexto(): UiTexto = when (this) {
     is PerfilJaExisteException -> texto(R.string.erro_perfil_ja_existe)
     is FirebaseAuthInvalidCredentialsException, is FirebaseAuthInvalidUserException -> texto(R.string.erro_login_invalido)
     is FirebaseNetworkException -> texto(R.string.erro_sem_internet)
+    is TempoEsgotadoException -> UiTexto.Livre(message.orEmpty())
     is IllegalStateException -> if (message?.contains("FirebaseApp") == true) {
         texto(R.string.erro_firebase_nao_configurado)
     } else {

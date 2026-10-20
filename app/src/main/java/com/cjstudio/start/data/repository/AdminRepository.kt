@@ -24,7 +24,7 @@ class AdminRepository @Inject constructor(
 
     override suspend fun entrar(email: String, senha: String): Result<String> = runCatching {
         val uid = auth.entrar(email, senha).getOrThrow()
-        if (!souAdmin().getOrDefault(false)) {
+        if (!etapa("conferir admin") { souAdmin().getOrDefault(false) }) {
             auth.sair()
             throw AcessoAdminRestritoException()
         }

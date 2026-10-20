@@ -38,12 +38,12 @@ class AuthRepository @Inject constructor(
         uidLogado() != null && !prefs.data.first()[KEY_UID].isNullOrEmpty()
 
     override suspend fun entrar(email: String, senha: String): Result<String> = runCatching {
-        val usuario = auth.get().signInWithEmailAndPassword(email, senha).await().user
+        val usuario = etapa("login") { auth.get().signInWithEmailAndPassword(email, senha).await().user }
             ?: throw IllegalStateException("Falha ao entrar.")
 
         // reload(): a confirmação acontece fora do app (no navegador) e o
         // token do signIn nem sempre já traz isEmailVerified atualizado.
-        usuario.reload().await()
+        etapa("atualizar conta") { usuario.reload().await() }
         if (!usuario.isEmailVerified) {
             reenviarVerificacaoComIntervalo()
             auth.get().signOut()
