@@ -66,7 +66,6 @@ class HomeMotoristaActivity : AppCompatActivity() {
         (supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment).getMapAsync { m ->
             mapa = m
             MapaUtil.configurar(this, m)
-            m.setPadding(0, resources.getDimensionPixelSize(R.dimen.folga_topo_mapa), 0, resources.getDimensionPixelSize(R.dimen.folga_painel_mapa))
             ativarMinhaLocalizacao()
             viewModel.oferta.value?.let { desenharOferta(it) }
         }
@@ -80,6 +79,8 @@ class HomeMotoristaActivity : AppCompatActivity() {
         }
         coletar(viewModel.oferta) { oferta ->
             binding.cardOferta.visibility = if (oferta != null) View.VISIBLE else View.GONE
+            // Com a oferta por cima do mapa, a rota é enquadrada acima dela.
+            mapa?.setPadding(0, 0, 0, if (oferta != null) resources.getDimensionPixelSize(R.dimen.folga_painel_corrida) else 0)
             if (oferta != null) {
                 val c = oferta.corrida
                 binding.tvOfertaValor.text = MapaUtil.valor(c.valor)
@@ -172,8 +173,6 @@ class HomeMotoristaActivity : AppCompatActivity() {
         binding.btnOnline.setText(if (motorista.online) R.string.motorista_ficar_offline else R.string.motorista_ficar_online)
         binding.btnOnline.setBackgroundResource(if (motorista.online) R.drawable.bg_botao_contorno else R.drawable.bg_botao_primario)
         binding.btnOnline.setTextColor(ContextCompat.getColor(this, if (motorista.online) R.color.amarelo else R.color.preto))
-        binding.tvSituacaoOnline.visibility = if (motorista.aprovado) View.VISIBLE else View.GONE
-        binding.tvSituacaoOnline.setText(if (motorista.online) R.string.motorista_online_msg else R.string.motorista_offline_msg)
     }
 
     private fun motivo(motorista: Motorista, padrao: Int): String =

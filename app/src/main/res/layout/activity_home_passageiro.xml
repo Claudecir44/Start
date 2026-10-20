@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mapa de fundo, topo (foto, olá, Sair) por cima e o painel de baixo com
-     "Para onde vamos?" ou a estimativa da corrida. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Topo (foto, olá, Sair) | linha | mapa | linha | "Para onde vamos?" ou a
+     estimativa da corrida. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fundo">
+    android:background="@color/fundo"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/cabecalho"
+        layout="@layout/include_cabecalho_usuario" />
+
+    <View style="@style/LinhaDivisoria" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapa"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-    <include
-        android:id="@+id/cabecalho"
-        layout="@layout/include_cabecalho_usuario"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_cabecalho_mapa" />
+    <View style="@style/LinhaDivisoria" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@drawable/bg_painel_inferior"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
         <LinearLayout
             android:id="@+id/cardParaOnde"
@@ -136,4 +137,4 @@
             android:indeterminateTint="@color/amarelo"
             android:visibility="gone" />
     </LinearLayout>
-</FrameLayout>
+</LinearLayout>

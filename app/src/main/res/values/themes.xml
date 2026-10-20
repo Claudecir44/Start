@@ -93,6 +93,14 @@
         <item name="chipBackgroundColor">@color/chip_fundo</item>
         <item name="android:textColor">@color/chip_texto</item>
     </style>
+    <!-- Linha fina que separa o mapa do topo e do rodapé. -->
+    <style name="LinhaDivisoria">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/amarelo</item>
+        <item name="android:alpha">0.6</item>
+    </style>
+
     <!-- Título pequeno acima de um campo do formulário. -->
     <style name="RotuloCampo">
         <item name="android:layout_width">match_parent</item>

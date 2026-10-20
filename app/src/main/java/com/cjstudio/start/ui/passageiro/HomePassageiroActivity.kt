@@ -67,7 +67,6 @@ class HomePassageiroActivity : AppCompatActivity() {
         (supportFragmentManager.findFragmentById(R.id.mapa) as SupportMapFragment).getMapAsync { m ->
             mapa = m
             MapaUtil.configurar(this, m)
-            m.setPadding(0, resources.getDimensionPixelSize(R.dimen.folga_topo_mapa), 0, resources.getDimensionPixelSize(R.dimen.folga_painel_mapa))
             ativarMinhaLocalizacao()
             viewModel.aqui.value?.let { m.moveCamera(CameraUpdateFactory.newLatLngZoom(it.latLng(), 15f)) }
             desenhar(viewModel.painel.value)

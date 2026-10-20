@@ -1,61 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Mapa de fundo, topo por cima e, embaixo: situação do cadastro (fora do
-     Aprovado), a corrida oferecida e o botão Ficar online/offline. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Topo (foto, olá, Sair) | linha | mapa (com a corrida oferecida por cima)
+     | linha | botão Ficar online/offline pequeno no canto direito. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fundo">
+    android:background="@color/fundo"
+    android:orientation="vertical">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/mapa"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include
+        android:id="@+id/cabecalho"
+        layout="@layout/include_cabecalho_usuario" />
 
+    <View style="@style/LinhaDivisoria" />
+
+    <!-- Só aparece fora do "Aprovado" (em análise, reprovado, bloqueado). -->
     <LinearLayout
+        android:id="@+id/cardSituacao"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <include
-            android:id="@+id/cabecalho"
-            layout="@layout/include_cabecalho_usuario"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_cabecalho_mapa" />
-
-        <!-- Só aparece fora do "Aprovado" (em análise, reprovado, bloqueado). -->
-        <LinearLayout
-            android:id="@+id/cardSituacao"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:background="@drawable/bg_cartao"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:id="@+id/tvStatusMensagem"
-                style="@style/TextoCorpo" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@drawable/bg_painel_inferior"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_cartao"
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Corrida mais próxima esperando motorista. -->
+        <TextView
+            android:id="@+id/tvStatusMensagem"
+            style="@style/TextoCorpo" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mapa"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Corrida mais próxima esperando motorista (por cima do mapa). -->
         <LinearLayout
             android:id="@+id/cardOferta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_painel_inferior"
             android:orientation="vertical"
+            android:padding="18dp"
             android:visibility="gone">
 
             <LinearLayout
@@ -124,17 +116,26 @@
                     android:text="@string/oferta_aceitar" />
             </LinearLayout>
         </LinearLayout>
+    </FrameLayout>
 
-        <TextView
-            android:id="@+id/tvSituacaoOnline"
-            style="@style/TextoCorpo"
-            android:layout_marginBottom="12dp"
-            android:gravity="center"
-            android:visibility="gone" />
+    <View style="@style/LinhaDivisoria" />
+
+    <!-- Botão pequeno (metade da largura) no canto inferior direito. -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
 
         <Button
             android:id="@+id/btnOnline"
             style="@style/BotaoPrimario"
+            android:layout_width="160dp"
+            android:layout_height="44dp"
+            android:layout_gravity="end"
+            android:textSize="14sp"
             android:visibility="gone" />
-    </LinearLayout>
-</FrameLayout>
+    </FrameLayout>
+</LinearLayout>
