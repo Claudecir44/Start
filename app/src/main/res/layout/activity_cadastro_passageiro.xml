@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fundo"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/topo"
+        layout="@layout/include_topo" />
+
+    <ScrollView
+        android:id="@+id/scrollRoot"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="32dp">
+
+            <include
+                android:id="@+id/foto"
+                layout="@layout/include_foto_perfil" />
+
+            <include
+                android:id="@+id/dados"
+                layout="@layout/include_dados_pessoais" />
+
+            <include
+                android:id="@+id/envio"
+                layout="@layout/include_termos_enviar" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

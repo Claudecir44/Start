@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// Fotos de perfil: qualquer usuário logado vê (na corrida, cada lado vê a
+// foto do outro). Documentos do motorista (CNH, CRLV): só o dono e admins.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function dono(uid) {
+      return logado() && request.auth.uid == uid;
+    }
+
+    function ehAdmin() {
+      return logado() && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+
+    function imagemValida() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 8 * 1024 * 1024;
+    }
+
+    match /fotos_perfil/{uid}/{arquivo} {
+      allow read: if logado();
+      allow write: if dono(uid) && imagemValida();
+    }
+
+    match /documentos_motorista/{uid}/{arquivo} {
+      allow read: if dono(uid) || ehAdmin();
+      allow write: if dono(uid) && imagemValida();
+    }
+
+    match /fotos_admin/{uid}/{arquivo} {
+      allow read: if logado();
+      allow write: if dono(uid) && ehAdmin() && imagemValida();
+    }
+  }
+}

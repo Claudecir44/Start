@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dados pessoais + dados de acesso, iguais nos cadastros de passageiro e
+     motorista (ver FormularioPessoal.kt). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/TituloSecao"
+        android:text="@string/cadastro_dados_pessoais" />
+
+    <EditText
+        android:id="@+id/etNome"
+        style="@style/Campo"
+        android:autofillHints="name"
+        android:hint="@string/nome_completo"
+        android:inputType="textPersonName|textCapWords" />
+
+    <EditText
+        android:id="@+id/etCpf"
+        style="@style/Campo"
+        android:hint="@string/cpf"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/etTelefone"
+        style="@style/Campo"
+        android:autofillHints="phone"
+        android:hint="@string/telefone"
+        android:inputType="phone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sexo"
+        android:textColor="@color/texto_secundario"
+        android:textSize="13sp" />
+
+    <RadioGroup
+        android:id="@+id/rgSexo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rbHomem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:buttonTint="@color/amarelo"
+            android:text="@string/sexo_homem"
+            android:textColor="@color/texto" />
+
+        <RadioButton
+            android:id="@+id/rbMulher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/amarelo"
+            android:text="@string/sexo_mulher"
+            android:textColor="@color/texto" />
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/blocoConta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/TituloSecao"
+            android:text="@string/cadastro_conta" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            style="@style/Campo"
+            android:autofillHints="emailAddress"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/etSenha"
+            style="@style/Campo"
+            android:hint="@string/senha"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/etConfirmarSenha"
+            style="@style/Campo"
+            android:hint="@string/confirmar_senha"
+            android:inputType="textPassword" />
+    </LinearLayout>
+</LinearLayout>

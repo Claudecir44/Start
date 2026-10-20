@@ -1,0 +1,146 @@
+package com.cjstudio.start.ui.admin
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.cjstudio.start.R
+import com.cjstudio.start.data.model.Passageiro
+import com.cjstudio.start.databinding.ActivityPainelAdminBinding
+import com.cjstudio.start.ui.admin.PainelAdminViewModel.FiltroMotorista
+import com.cjstudio.start.ui.admin.PainelAdminViewModel.Secao
+import com.cjstudio.start.ui.common.Navegacao
+import com.cjstudio.start.ui.common.coletar
+import com.cjstudio.start.ui.common.mostrarMensagem
+import com.cjstudio.start.util.FotoUtil
+import com.cjstudio.start.util.carregarFotoRedonda
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class PainelAdminActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityPainelAdminBinding
+    private val viewModel: PainelAdminViewModel by viewModels()
+    private val adapter = ItemPessoaAdapter { item -> tocou(item) }
+
+    private val seletorFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) viewModel.trocarMinhaFoto(FotoUtil.copiarParaTemporario(this, uri) ?: uri)
+    }
+
+    private val chipsFiltro by lazy {
+        mapOf(
+            binding.chipEmAnalise.id to FiltroMotorista.EM_ANALISE,
+            binding.chipAprovados.id to FiltroMotorista.APROVADOS,
+            binding.chipReprovados.id to FiltroMotorista.REPROVADOS,
+            binding.chipBloqueados.id to FiltroMotorista.BLOQUEADOS,
+            binding.chipTodos.id to FiltroMotorista.TODOS
+        )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityPainelAdminBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.rvItens.layoutManager = LinearLayoutManager(this)
+        binding.rvItens.adapter = adapter
+
+        binding.ivFoto.setOnClickListener {
+            seletorFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+        binding.btnSair.setOnClickListener { viewModel.sair() }
+        binding.btnMotoristas.setOnClickListener { viewModel.abrir(Secao.MOTORISTAS) }
+        binding.btnPassageiros.setOnClickListener { viewModel.abrir(Secao.PASSAGEIROS) }
+        binding.btnAdministradores.setOnClickListener { viewModel.abrir(Secao.ADMINISTRADORES) }
+        binding.btnNovoAdmin.setOnClickListener { startActivity(Intent(this, CadastroAdminActivity::class.java)) }
+        binding.chipsFiltro.setOnCheckedStateChangeListener { _, ids ->
+            ids.firstOrNull()?.let { id -> chipsFiltro[id]?.let { viewModel.filtrarMotoristas(it) } }
+        }
+
+        coletar(viewModel.estado) { mostrar(it) }
+        coletar(viewModel.eventos) { evento ->
+            when (evento) {
+                PainelAdminViewModel.Evento.Saiu -> Navegacao.irLimpando(this, Navegacao.telaLogin())
+                is PainelAdminViewModel.Evento.Mensagem -> mostrarMensagem(evento.texto)
+                is PainelAdminViewModel.Evento.ConfirmarBloqueio -> confirmarBloqueio(evento.passageiro)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.atualizar()
+    }
+
+    private fun mostrar(estado: PainelAdminViewModel.Estado) {
+        estado.admin?.let { admin ->
+            binding.tvNome.text = admin.nome?.ifBlank { null } ?: admin.email.orEmpty()
+            binding.tvPapel.setText(
+                when {
+                    admin.ehMaster -> R.string.admin_selo_master
+                    admin.ehColaborador -> R.string.admin_selo_colaborador
+                    else -> R.string.admin_selo_admin
+                }
+            )
+            binding.ivFoto.carregarFotoRedonda(admin.fotoUrl)
+            // Botão só aparece com a permissão (a trava de verdade é das regras).
+            binding.btnMotoristas.visibility = visivel(admin.temPermissao("motoristas"))
+            binding.btnPassageiros.visibility = visivel(admin.temPermissao("passageiros"))
+            binding.btnAdministradores.visibility = visivel(admin.temPermissao("administradores"))
+        }
+
+        binding.tvBadgeMotoristas.visibility = visivel(estado.motoristasEmAnalise > 0)
+        binding.tvBadgeMotoristas.text = estado.motoristasEmAnalise.toString()
+
+        val secao = estado.secao
+        binding.areaSecao.visibility = visivel(secao != null)
+        binding.tvDica.visibility = visivel(secao == null)
+        if (secao == null) return
+
+        binding.tvTituloSecao.setText(
+            when (secao) {
+                Secao.MOTORISTAS -> R.string.admin_motoristas
+                Secao.PASSAGEIROS -> R.string.admin_passageiros
+                Secao.ADMINISTRADORES -> R.string.admin_administradores
+            }
+        )
+        binding.tvContador.text = resources.getQuantityString(R.plurals.admin_contador, estado.itens.size, estado.itens.size)
+        binding.chipsFiltro.visibility = visivel(secao == Secao.MOTORISTAS)
+        chipsFiltro.entries.firstOrNull { it.value == estado.filtroMotorista }?.let { binding.chipsFiltro.check(it.key) }
+        binding.btnNovoAdmin.visibility = visivel(secao == Secao.ADMINISTRADORES)
+        binding.progressBar.visibility = visivel(estado.carregando)
+        binding.tvVazio.visibility = visivel(!estado.carregando && estado.itens.isEmpty())
+        adapter.submitList(estado.itens)
+    }
+
+    private fun tocou(item: ItemPessoa) {
+        when (viewModel.estado.value.secao) {
+            Secao.MOTORISTAS -> startActivity(
+                Intent(this, DetalhesMotoristaAdminActivity::class.java).putExtra(DetalhesMotoristaAdminActivity.EXTRA_UID, item.id)
+            )
+            Secao.PASSAGEIROS -> viewModel.tocouPassageiro(item.id)
+            else -> Unit
+        }
+    }
+
+    private fun confirmarBloqueio(passageiro: Passageiro) {
+        val nome = passageiro.nomeCompleto.orEmpty()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(nome)
+            .setMessage(
+                getString(if (passageiro.bloqueado) R.string.admin_desbloquear_passageiro_msg else R.string.admin_bloquear_passageiro_msg, nome)
+            )
+            .setPositiveButton(if (passageiro.bloqueado) R.string.admin_desbloquear else R.string.admin_bloquear) { _, _ ->
+                viewModel.alternarBloqueio(passageiro)
+            }
+            .setNegativeButton(R.string.cancelar, null)
+            .show()
+    }
+
+    private fun visivel(mostrar: Boolean) = if (mostrar) View.VISIBLE else View.GONE
+}

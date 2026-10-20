@@ -1,0 +1,22 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+/.firebase
+/.claude
+firestore-debug.log
+firebase-debug.log
+functions/node_modules
+functions/.env
+
+# Credenciais de assinatura de release — nunca no controle de versão.
+keystore.properties
+*.jks
+*.keystore
+.kotlin

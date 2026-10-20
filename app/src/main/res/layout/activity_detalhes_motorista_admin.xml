@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fundo"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/topo"
+        layout="@layout/include_topo" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivFoto"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/bg_foto_redonda"
+                    android:contentDescription="@null"
+                    android:padding="2dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_pessoa" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvNome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/texto"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvStatusAtual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/amarelo"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/TituloSecao"
+                android:text="@string/cadastro_dados_pessoais" />
+
+            <TextView
+                android:id="@+id/tvDadosPessoais"
+                style="@style/TextoCorpo"
+                android:textColor="@color/texto" />
+
+            <TextView
+                style="@style/TituloSecao"
+                android:text="@string/motorista_cnh" />
+
+            <TextView
+                android:id="@+id/tvCnh"
+                style="@style/TextoCorpo"
+                android:textColor="@color/texto" />
+
+            <TextView
+                style="@style/TituloSecao"
+                android:text="@string/motorista_veiculo" />
+
+            <TextView
+                android:id="@+id/tvVeiculo"
+                style="@style/TextoCorpo"
+                android:textColor="@color/texto" />
+
+            <TextView
+                style="@style/TituloSecao"
+                android:text="@string/admin_documentos" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivCnh"
+                    android:layout_width="0dp"
+                    android:layout_height="140dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cartao"
+                    android:contentDescription="@string/motorista_cnh"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
+                    android:id="@+id/ivCrlv"
+                    android:layout_width="0dp"
+                    android:layout_height="140dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_cartao"
+                    android:contentDescription="@string/motorista_foto_crlv"
+                    android:scaleType="centerCrop" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center_horizontal"
+        android:indeterminateTint="@color/amarelo"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <Button
+            android:id="@+id/btnBloquear"
+            style="@style/BotaoContorno"
+            android:layout_width="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/admin_bloquear" />
+
+        <Button
+            android:id="@+id/btnReprovar"
+            style="@style/BotaoContorno"
+            android:layout_width="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/admin_reprovar" />
+
+        <Button
+            android:id="@+id/btnAprovar"
+            style="@style/BotaoPrimario"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="@string/admin_aprovar" />
+    </LinearLayout>
+</LinearLayout>

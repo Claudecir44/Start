@@ -1,0 +1,113 @@
+rules_version = '2';
+
+// Regras do Start (passageiro, motorista e admin no mesmo projeto).
+// Princípio: cada um lê/grava só o próprio perfil; campos de "situação"
+// (status do motorista, bloqueio do passageiro, contadores) só o admin ou o
+// servidor mudam. Admins vêm SÓ da Cloud Function cadastrarAdmin.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function dono(uid) {
+      return logado() && request.auth.uid == uid;
+    }
+
+    function ehAdmin() {
+      return logado() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function permissaoAdmin(chave) {
+      let dados = get(/databases/$(database)/documents/admins/$(request.auth.uid)).data;
+      return dados.cpf == '56413025034'
+        || !('permissoes' in dados)
+        || dados.permissoes == null
+        || dados.permissoes.get(chave, false) == true;
+    }
+
+    function alterados() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    function sexoValido(d) {
+      return d.sexo in ['homem', 'mulher'];
+    }
+
+    // O perfil novo tem que apontar pra um CPF reservado (no mesmo batch)
+    // por este mesmo uid — ver ReservaCpf.kt.
+    function cpfReservado(tipo, uid) {
+      let id = tipo + '_' + request.resource.data.cpf;
+      return getAfter(/databases/$(database)/documents/cpfs/$(id)).data.uid == uid;
+    }
+
+    // ===== Reserva de CPF (um cadastro por tipo) =====
+    match /cpfs/{id} {
+      // Só existência/uid; usado pra avisar "CPF já cadastrado".
+      allow get: if logado();
+      allow create: if logado()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.tipo in ['passageiro', 'motorista']
+        && id == request.resource.data.tipo + '_' + id.split('_')[1];
+      allow update: if false;
+      allow delete: if ehAdmin();
+    }
+
+    // ===== Passageiros =====
+    match /passageiros/{uid} {
+      allow read: if dono(uid) || (ehAdmin() && permissaoAdmin('passageiros'));
+      allow create: if dono(uid)
+        && request.resource.data.bloqueado == false
+        && request.resource.data.totalCorridas == 0
+        && request.resource.data.avaliacaoMedia == 0
+        && sexoValido(request.resource.data)
+        && cpfReservado('passageiro', uid);
+      allow update: if (dono(uid)
+          && !alterados().hasAny(['bloqueado', 'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo']))
+        || (ehAdmin() && permissaoAdmin('passageiros') && alterados().hasOnly(['bloqueado']));
+      allow delete: if false;
+    }
+
+    // ===== Motoristas =====
+    match /motoristas/{uid} {
+      allow read: if dono(uid) || (ehAdmin() && permissaoAdmin('motoristas'));
+      allow create: if dono(uid)
+        && request.resource.data.status == 'em_analise'
+        && request.resource.data.online == false
+        && request.resource.data.totalCorridas == 0
+        && request.resource.data.avaliacaoMedia == 0
+        && request.resource.data.analisadoPor == null
+        && sexoValido(request.resource.data)
+        && cpfReservado('motorista', uid);
+      allow update: if
+        // Dados do próprio perfil (nunca situação/contadores/identidade).
+        (dono(uid)
+          && !alterados().hasAny(['status', 'motivoStatus', 'analisadoPor', 'analisadoEm', 'online',
+                                  'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo']))
+        // Ficar online só aprovado; ficar offline sempre.
+        || (dono(uid) && alterados().hasOnly(['online'])
+          && (request.resource.data.online == false || resource.data.status == 'aprovado'))
+        // Admin decide a situação do cadastro.
+        || (ehAdmin() && permissaoAdmin('motoristas')
+          && alterados().hasOnly(['status', 'motivoStatus', 'analisadoPor', 'analisadoEm', 'online'])
+          && request.resource.data.status in ['em_analise', 'aprovado', 'reprovado', 'bloqueado']
+          && request.resource.data.analisadoPor == request.auth.uid
+          && (request.resource.data.status == 'aprovado' || request.resource.data.online == false));
+      allow delete: if false;
+    }
+
+    // ===== Administradores =====
+    match /admins/{uid} {
+      allow read: if dono(uid) || ehAdmin();
+      // Só a foto, pelo próprio admin. Criar/excluir: só Cloud Function.
+      allow update: if dono(uid) && alterados().hasOnly(['fotoUrl']);
+      allow create, delete: if false;
+    }
+
+    match /logsAdministracao/{id} {
+      allow read: if ehAdmin() && permissaoAdmin('administradores');
+      allow write: if false;
+    }
+  }
+}

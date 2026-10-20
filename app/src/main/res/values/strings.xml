@@ -1,0 +1,169 @@
+<resources>
+    <!-- app_name vem de cada flavor (app/build.gradle.kts). -->
+    <string name="slogan">Vá mais longe</string>
+    <string name="ok">OK</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="voltar">Voltar</string>
+    <string name="sair">Sair</string>
+
+    <!-- Erros -->
+    <string name="erro_generico">Algo deu errado: %1$s</string>
+    <string name="erro_email_nao_verificado">Confirme seu e-mail antes de entrar.</string>
+    <string name="erro_perfil_nao_encontrado">Esta conta ainda não tem cadastro neste app.</string>
+    <string name="erro_conta_bloqueada">Sua conta está bloqueada. Fale com o suporte: cjstudiotechnology@gmail.com</string>
+    <string name="erro_acesso_restrito_admin">Acesso restrito a administradores.</string>
+    <string name="erro_cpf_ja_cadastrado">Já existe um cadastro com este CPF.</string>
+    <string name="erro_email_ja_cadastrado">Este e-mail já tem conta. Entre com ele na tela de login.</string>
+    <string name="erro_login_invalido">E-mail ou senha incorretos.</string>
+    <string name="erro_sem_internet">Sem conexão com a internet.</string>
+    <string name="erro_firebase_nao_configurado">O servidor do app ainda não foi configurado.</string>
+
+    <!-- Login -->
+    <string name="login_subtitulo_passageiro">Peça sua corrida em poucos toques</string>
+    <string name="login_subtitulo_motorista">Dirija e ganhe com o Start</string>
+    <string name="login_subtitulo_admin">Painel administrativo</string>
+    <string name="email">E-mail</string>
+    <string name="senha">Senha</string>
+    <string name="entrar">Entrar</string>
+    <string name="login_criar_conta">Não tem conta? <b>Cadastre-se</b></string>
+    <string name="login_esqueci_senha">Esqueci minha senha</string>
+    <string name="login_erro_campos">Informe um e-mail válido e a senha.</string>
+    <string name="login_erro_email_recuperar">Digite seu e-mail no campo acima para receber o link de nova senha.</string>
+    <string name="login_redefinicao_enviada">Enviamos um link para criar uma nova senha em %1$s.</string>
+    <string name="login_completar_titulo">Complete seu cadastro</string>
+    <string name="login_completar_passageiro">Sua conta ainda não tem cadastro de passageiro. Quer completar agora, usando o mesmo e-mail?</string>
+    <string name="login_completar_motorista">Sua conta ainda não tem cadastro de motorista. Quer completar agora, usando o mesmo e-mail? Vamos pedir sua CNH e os dados do carro.</string>
+    <string name="login_completar_sim">Completar</string>
+    <string name="verificar_email_titulo">Confirme seu e-mail</string>
+    <string name="verificar_email_cadastro">Cadastro feito! Enviamos um link de confirmação para %1$s.\n\nAbra o e-mail (olhe também o spam), toque no link e depois entre no app.</string>
+    <string name="verificar_email_login">Seu e-mail %1$s ainda não foi confirmado. Enviamos o link de novo: abra o e-mail (olhe também o spam), toque no link e entre de novo.</string>
+
+    <!-- Cadastro (comum) -->
+    <string name="cadastro_titulo_passageiro">Criar conta</string>
+    <string name="cadastro_titulo_motorista">Cadastro de motorista</string>
+    <string name="cadastro_escolher_foto">Toque para escolher sua foto</string>
+    <string name="cadastro_dados_pessoais">Dados pessoais</string>
+    <string name="cadastro_conta">Dados de acesso</string>
+    <string name="nome_completo">Nome completo</string>
+    <string name="cpf">CPF</string>
+    <string name="telefone">Celular com DDD</string>
+    <string name="confirmar_senha">Confirmar senha</string>
+    <string name="sexo">Sexo</string>
+    <string name="sexo_homem">Homem</string>
+    <string name="sexo_mulher">Mulher</string>
+    <string name="sexo_nao_informado">Não informado</string>
+    <string name="cadastro_termos">Li e aceito os <u>Termos de Uso e a Política de Privacidade</u></string>
+    <string name="cadastro_botao">Criar conta</string>
+    <string name="cadastro_enviando">Enviando…</string>
+    <string name="cadastro_erro_foto">Escolha uma foto sua (rosto visível).</string>
+    <string name="cadastro_erro_nome">Informe nome e sobrenome.</string>
+    <string name="cadastro_erro_cpf">CPF inválido.</string>
+    <string name="cadastro_erro_telefone">Informe o celular com DDD.</string>
+    <string name="cadastro_erro_sexo">Escolha o sexo.</string>
+    <string name="cadastro_erro_email">E-mail inválido.</string>
+    <string name="cadastro_erro_senha">A senha precisa ter de 6 a 20 caracteres.</string>
+    <string name="cadastro_erro_senhas_diferentes">As senhas não são iguais.</string>
+    <string name="cadastro_erro_termos">Aceite os Termos de Uso e a Política de Privacidade.</string>
+
+    <!-- Cadastro do motorista -->
+    <string name="motorista_aviso_analise">Seu cadastro passa por análise antes de você receber corridas. Tenha em mãos a CNH e o documento do carro (CRLV).</string>
+    <string name="data_nascimento">Data de nascimento (dd/mm/aaaa)</string>
+    <string name="motorista_cnh">Carteira de motorista (CNH)</string>
+    <string name="motorista_cnh_numero">Número da CNH (11 dígitos)</string>
+    <string name="motorista_cnh_categoria_hint">Categoria</string>
+    <string name="motorista_cnh_validade">Validade (dd/mm/aaaa)</string>
+    <string name="motorista_foto_cnh">Foto da CNH (frente, legível)</string>
+    <string name="motorista_veiculo">Seu carro</string>
+    <string name="motorista_marca">Marca (ex.: Chevrolet)</string>
+    <string name="motorista_modelo">Modelo (ex.: Onix)</string>
+    <string name="motorista_ano">Ano</string>
+    <string name="motorista_cor">Cor</string>
+    <string name="motorista_placa">Placa (ABC1D23)</string>
+    <string name="motorista_foto_crlv">Foto do documento do carro (CRLV)</string>
+    <string name="motorista_foto_trocar">Foto escolhida, toque para trocar</string>
+    <string name="motorista_botao_enviar">Enviar cadastro para análise</string>
+    <string name="motorista_erro_nascimento">Data de nascimento inválida.</string>
+    <string name="motorista_erro_idade">É preciso ter pelo menos %1$d anos para dirigir no Start.</string>
+    <string name="motorista_erro_cnh">O número da CNH tem 11 dígitos.</string>
+    <string name="motorista_erro_cnh_categoria">Escolha a categoria da CNH.</string>
+    <string name="motorista_erro_cnh_validade">A CNH está vencida ou a data é inválida.</string>
+    <string name="motorista_erro_foto_cnh">Envie a foto da CNH.</string>
+    <string name="motorista_erro_veiculo">Preencha marca, modelo e cor do carro.</string>
+    <string name="motorista_erro_ano">Ano do carro inválido.</string>
+    <string name="motorista_erro_ano_antigo">O carro precisa ser do ano %1$d ou mais novo.</string>
+    <string name="motorista_erro_placa">Placa inválida (ex.: ABC1D23 ou ABC1234).</string>
+    <string name="motorista_erro_foto_crlv">Envie a foto do documento do carro (CRLV).</string>
+
+    <!-- Telas iniciais -->
+    <string name="home_ola">Olá, %1$s!</string>
+    <string name="home_para_onde">Para onde vamos?</string>
+    <string name="home_para_onde_dica">Toque para escolher o destino</string>
+    <string name="em_breve_corridas">Pedir corridas chega na próxima atualização do Start.</string>
+    <string name="status_em_analise">Cadastro em análise</string>
+    <string name="status_em_analise_msg">Estamos conferindo seus documentos. Assim que for aprovado, esta tela muda sozinha e você já pode ficar online.</string>
+    <string name="status_aprovado">Aprovado</string>
+    <string name="status_aprovado_msg">Seu cadastro foi aprovado. Fique online para receber corridas.</string>
+    <string name="status_reprovado">Reprovado</string>
+    <string name="status_reprovado_msg">Seu cadastro não foi aprovado. Fale com o suporte: cjstudiotechnology@gmail.com</string>
+    <string name="status_bloqueado">Bloqueado</string>
+    <string name="status_bloqueado_msg">Sua conta de motorista está bloqueada. Fale com o suporte: cjstudiotechnology@gmail.com</string>
+    <string name="status_motivo">Motivo: %1$s</string>
+    <string name="motorista_ficar_online">Ficar online</string>
+    <string name="motorista_ficar_offline">Ficar offline</string>
+    <string name="motorista_online_msg">Você está online. As corridas vão aparecer aqui.</string>
+    <string name="motorista_offline_msg">Você está offline e não recebe corridas.</string>
+
+    <!-- Admin -->
+    <string name="admin_cadastrar">Cadastrar administrador</string>
+    <string name="admin_novo_titulo">Novo administrador</string>
+    <string name="admin_nome">Nome</string>
+    <string name="admin_sobrenome">Sobrenome</string>
+    <string name="admin_papel">Tipo de acesso</string>
+    <string name="admin_papel_admin">Administrador (acesso total)</string>
+    <string name="admin_papel_colaborador">Colaborador (escolher permissões)</string>
+    <string name="admin_senha_master">Senha do administrador master</string>
+    <string name="admin_senha_master_dica">Só o administrador master tem esta senha. Ela autoriza a criação de novos administradores.</string>
+    <string name="admin_erro_permissoes">Marque pelo menos uma permissão para o colaborador.</string>
+    <string name="admin_erro_senha_master">Informe a senha do administrador master.</string>
+    <string name="admin_cadastrado">Administrador cadastrado. Ele já pode entrar com o e-mail e a senha criados.</string>
+    <string name="admin_selo_master">Master</string>
+    <string name="admin_selo_admin">Administrador</string>
+    <string name="admin_selo_colaborador">Colaborador</string>
+    <string name="admin_motoristas">Motoristas</string>
+    <string name="admin_passageiros">Passageiros</string>
+    <string name="admin_administradores">Administradores</string>
+    <string name="admin_dica">Escolha uma seção acima.\n\nMotoristas novos chegam como "Em análise": confira os documentos e aprove para que possam receber corridas.</string>
+    <string name="admin_nenhum">Nada por aqui.</string>
+    <string name="admin_novo_admin">+ Novo administrador</string>
+    <string name="admin_filtro_em_analise">Em análise</string>
+    <string name="admin_filtro_aprovados">Aprovados</string>
+    <string name="admin_filtro_reprovados">Reprovados</string>
+    <string name="admin_filtro_bloqueados">Bloqueados</string>
+    <string name="admin_filtro_todos">Todos</string>
+    <plurals name="admin_contador">
+        <item quantity="one">%d registro</item>
+        <item quantity="other">%d registros</item>
+    </plurals>
+    <string name="admin_bloquear">Bloquear</string>
+    <string name="admin_desbloquear">Desbloquear</string>
+    <string name="admin_aprovar">Aprovar</string>
+    <string name="admin_reprovar">Reprovar</string>
+    <string name="admin_bloquear_passageiro_msg">Bloquear %1$s? A pessoa não consegue mais entrar no app até ser desbloqueada.</string>
+    <string name="admin_desbloquear_passageiro_msg">Desbloquear %1$s? A pessoa volta a poder usar o app.</string>
+    <string name="admin_passageiro_bloqueado">Passageiro bloqueado.</string>
+    <string name="admin_passageiro_desbloqueado">Passageiro desbloqueado.</string>
+    <string name="admin_motorista_nao_encontrado">Motorista não encontrado.</string>
+    <string name="admin_erro_motivo">Escreva o motivo — o motorista vai ver esse texto.</string>
+    <string name="admin_motivo_hint">Motivo (o motorista vai ver)</string>
+    <string name="admin_status_salvo">Situação do motorista atualizada.</string>
+    <string name="admin_status_atual">Situação: %1$s</string>
+    <string name="admin_analise_titulo">Análise do motorista</string>
+    <string name="admin_documentos">Documentos (toque para ampliar)</string>
+    <string name="admin_detalhe_pessoal">CPF: %1$s\nNascimento: %2$s (%3$s anos)\nSexo: %4$s\nCelular: %5$s\nE-mail: %6$s</string>
+    <string name="admin_detalhe_cnh">CNH nº %1$s\nCategoria: %2$s\nValidade: %3$s</string>
+    <string name="admin_detalhe_veiculo">%1$s %2$s %3$s\nCor: %4$s\nPlaca: %5$s</string>
+
+    <!-- Termos -->
+    <string name="termos_titulo">Termos de Uso e Privacidade</string>
+    <string name="termos_texto">O Start é um aplicativo da CJ Studio Technology que conecta passageiros a motoristas parceiros para corridas urbanas.\n\n1. Cadastro\nVocê precisa informar dados verdadeiros: nome completo, CPF, celular, e-mail e foto. Motoristas também enviam CNH válida e documento do veículo (CRLV), que são conferidos antes da aprovação.\n\n2. Uso dos dados\nSeus dados são usados para criar e proteger sua conta, identificar passageiros e motoristas durante a corrida, prevenir fraudes e cumprir obrigações legais. Documentos de motoristas são vistos apenas pela equipe de análise.\n\n3. Compartilhamento\nDurante uma corrida, o passageiro vê nome, foto, carro e placa do motorista, e o motorista vê nome e foto do passageiro. Não vendemos seus dados.\n\n4. Conduta\nÉ proibido usar o app para atividades ilegais, discriminar, assediar ou ameaçar qualquer pessoa. Contas que descumprirem estas regras podem ser bloqueadas.\n\n5. Seus direitos (LGPD)\nVocê pode pedir acesso, correção ou exclusão dos seus dados pelo e-mail cjstudiotechnology@gmail.com.\n\n6. Contato\nCJ Studio Technology, cjstudiotechnology@gmail.com</string>
+</resources>

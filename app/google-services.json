@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "931876846172",
+    "project_id": "start-3835f",
+    "storage_bucket": "start-3835f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931876846172:android:6f55321cf9e19839db8499",
+        "android_client_info": {
+          "package_name": "com.cjstudio.start.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQ7t6RMeUuPeWp6fmuHrDxtzHVhIG7a4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931876846172:android:d5c8394c226e1066db8499",
+        "android_client_info": {
+          "package_name": "com.cjstudio.start.motorista"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQ7t6RMeUuPeWp6fmuHrDxtzHVhIG7a4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931876846172:android:8e3052604f739288db8499",
+        "android_client_info": {
+          "package_name": "com.cjstudio.start.passageiro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQ7t6RMeUuPeWp6fmuHrDxtzHVhIG7a4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

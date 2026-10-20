@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta tirada do logo: fundo quase preto, amarelo → laranja do "S". -->
+    <color name="fundo">#07080B</color>
+    <color name="superficie">#14161C</color>
+    <color name="superficie_alta">#1E2129</color>
+    <color name="borda">#2C3039</color>
+    <color name="amarelo">#FFC400</color>
+    <color name="amarelo_claro">#FFDD33</color>
+    <color name="laranja">#FF7A00</color>
+    <color name="texto">#FFFFFF</color>
+    <color name="texto_secundario">#A3A8B4</color>
+    <color name="dica">#6C7280</color>
+    <color name="preto">#07080B</color>
+    <color name="branco">#FFFFFF</color>
+    <color name="verde">#2ECC71</color>
+    <color name="vermelho">#FF5A5A</color>
+    <color name="ic_launcher_background">#07080B</color>
+</resources>

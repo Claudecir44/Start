@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Start - propostas de logo</title>
+<!-- Quadro com 3 propostas. Gerar o PNG:
+     chrome --headless --screenshot=propostas_logo_start.png --window-size=1800,950 --hide-scrollbars propostas_logo_start.html -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { width: 1800px; height: 950px; background: #f2f4f8; font-family: 'Poppins', Arial, sans-serif; color: #0b1020; padding: 50px 60px; }
+  header h1 { font-size: 40px; font-weight: 800; letter-spacing: -1px; }
+  header p { font-size: 19px; color: #5a6275; margin-top: 4px; }
+  .grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 36px; }
+  .card { background: #fff; border-radius: 28px; overflow: hidden; box-shadow: 0 10px 30px rgba(11, 16, 32, .08); }
+  .topo { height: 330px; display: flex; align-items: center; justify-content: center; gap: 22px; }
+  .claro { background: #ffffff; border-bottom: 1px solid #eceff4; }
+  .escuro { background: #0b1020; height: 230px; display: flex; align-items: center; justify-content: space-evenly; }
+  .marca { font-size: 92px; font-weight: 800; letter-spacing: -4px; line-height: 1; }
+  .marca .pt { color: #00c26e; }
+  .escuro .marca { color: #fff; font-size: 64px; letter-spacing: -2.5px; }
+  .icone-app { width: 150px; height: 150px; border-radius: 36px; overflow: hidden; box-shadow: 0 8px 22px rgba(0, 0, 0, .45); }
+  .icone-app svg { width: 100%; height: 100%; display: block; }
+  .info { padding: 22px 28px 28px; }
+  .info h2 { font-size: 24px; font-weight: 700; }
+  .info h2 span { display: inline-block; background: #0b1020; color: #fff; border-radius: 8px; padding: 0 10px; margin-right: 8px; font-size: 20px; }
+  .info p { font-size: 16.5px; color: #4a5266; line-height: 1.5; margin-top: 8px; }
+  .slogan { font-size: 15px; font-weight: 600; color: #8a93a8; letter-spacing: 3px; text-transform: uppercase; margin-top: 10px; text-align: center; }
+  .vert { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00e676"/><stop offset="1" stop-color="#00a8ff"/>
+    </linearGradient>
+    <linearGradient id="gEstrada" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00e676"/><stop offset="1" stop-color="#00a8ff"/>
+    </linearGradient>
+
+    <!-- 1. Pino + Play: o ponto de partida no mapa vira o botão de "iniciar" -->
+    <g id="pinoPlay">
+      <path d="M50 6C27.5 6 11 22.6 11 44.2 11 70 50 96 50 96S89 70 89 44.2C89 22.6 72.5 6 50 6Z" fill="url(#g)"/>
+      <path d="M41.5 29.5c0-2.6 2.8-4.2 5-2.9l21.6 13.3c2.1 1.3 2.1 4.4 0 5.7L46.5 58.9c-2.2 1.3-5-.3-5-2.9Z" fill="#fff"/>
+    </g>
+
+    <!-- 2. Estrada em S: o S de Start desenhado como uma pista, saindo de um ponto de partida -->
+    <g id="estradaS">
+      <path d="M74 20C52 9 22 16 26 34c3.5 15 48 12 49 32 1 20-33 25-50 13" fill="none" stroke="url(#gEstrada)" stroke-width="17" stroke-linecap="round"/>
+      <path d="M74 20C52 9 22 16 26 34c3.5 15 48 12 49 32 1 20-33 25-50 13" fill="none" stroke="#fff" stroke-width="2.6" stroke-dasharray="6 6" stroke-linecap="round"/>
+      <circle cx="25" cy="79" r="11" fill="#fff"/>
+      <circle cx="25" cy="79" r="6.5" fill="#00a8ff"/>
+    </g>
+
+    <!-- 3. Ignição: o botão de ligar, com o pino de localização no lugar do traço -->
+    <g id="ignicao">
+      <path d="M68 29.5A30 30 0 1 1 32 29.5" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+      <path d="M50 52S38 39.5 38 30a12 12 0 0 1 24 0C62 39.5 50 52 50 52Z" fill="url(#g)"/>
+      <circle cx="50" cy="29.5" r="4.6" fill="#fff"/>
+    </g>
+  </defs>
+</svg>
+
+<header>
+  <h1>Start · propostas de logo</h1>
+  <p>App de corridas (estilo Uber / 99). Verde = partida, “vai”. Azul = tecnologia e confiança.</p>
+</header>
+
+<div class="grade">
+  <!-- 1 -->
+  <div class="card">
+    <div class="topo claro vert">
+      <div style="display:flex;align-items:center;gap:18px">
+        <svg width="120" height="120" viewBox="0 0 100 100"><use href="#pinoPlay"/></svg>
+        <div class="marca">Start<span class="pt">.</span></div>
+      </div>
+      <div class="slogan">Sua corrida começa aqui</div>
+    </div>
+    <div class="escuro">
+      <div class="icone-app"><svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#1a2240"/><g transform="translate(17 15) scale(.66)"><use href="#pinoPlay"/></g></svg></div>
+      <div class="marca">Start<span class="pt">.</span></div>
+    </div>
+    <div class="info">
+      <h2><span>1</span>Pino + Play</h2>
+      <p>O pino do mapa (onde você está) com o botão “iniciar” dentro. Simples e fácil de reconhecer até pequeno na tela do celular.</p>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <div class="topo claro vert">
+      <div style="display:flex;align-items:center;gap:18px">
+        <svg width="120" height="120" viewBox="0 0 100 100"><use href="#estradaS"/></svg>
+        <div class="marca">Start<span class="pt">.</span></div>
+      </div>
+      <div class="slogan">Sua corrida começa aqui</div>
+    </div>
+    <div class="escuro">
+      <div class="icone-app"><svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#1a2240"/><g transform="translate(14 12) scale(.72)"><use href="#estradaS"/></g></svg></div>
+      <div class="marca">Start<span class="pt">.</span></div>
+    </div>
+    <div class="info">
+      <h2><span>2</span>Estrada em S</h2>
+      <p>O “S” de Start desenhado como uma pista com faixa no meio, saindo de um ponto de partida. Passa a ideia de movimento e trajeto.</p>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <div class="topo claro vert">
+      <div style="display:flex;align-items:center;gap:18px">
+        <svg width="120" height="120" viewBox="0 0 100 100"><use href="#ignicao"/></svg>
+        <div class="marca">Start<span class="pt">.</span></div>
+      </div>
+      <div class="slogan">Sua corrida começa aqui</div>
+    </div>
+    <div class="escuro">
+      <div class="icone-app"><svg viewBox="0 0 100 100"><rect width="100" height="100" fill="#1a2240"/><g transform="translate(15 13) scale(.7)"><use href="#ignicao"/></g></svg></div>
+      <div class="marca">Start<span class="pt">.</span></div>
+    </div>
+    <div class="info">
+      <h2><span>3</span>Ignição</h2>
+      <p>O botão de “ligar” do carro (start/stop), com o pino de localização no lugar do traço. Liga o motor e já sabe pra onde ir.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
