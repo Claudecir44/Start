@@ -11,7 +11,14 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 // Mesma região usada no app (FirebaseModule.provideFirebaseFunctions).
-setGlobalOptions({ region: 'southamerica-east1', maxInstances: 10 });
+// Conta de execução: a do SDK Admin do Firebase. A conta padrão do Compute
+// nasce SEM papéis neste projeto (a organização do Google Cloud desliga as
+// concessões automáticas), e a do Firebase já tem Firestore/Auth/Storage.
+setGlobalOptions({
+    region: 'southamerica-east1',
+    maxInstances: 10,
+    serviceAccount: 'firebase-adminsdk-fbsvc@start-3835f.iam.gserviceaccount.com',
+});
 
 // Senha exigida pra criar administradores — só existe aqui (functions/.env),
 // nunca no app.
