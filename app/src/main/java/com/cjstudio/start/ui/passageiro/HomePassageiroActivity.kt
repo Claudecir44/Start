@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.cjstudio.start.R
 import com.cjstudio.start.data.model.Corrida
 import com.cjstudio.start.databinding.ActivityHomePassageiroBinding
+import com.cjstudio.start.ui.chat.AtalhoChatViewModel
+import com.cjstudio.start.ui.chat.ChatActivity
+import com.cjstudio.start.ui.chat.mostrarBotaoChat
 import com.cjstudio.start.ui.common.Navegacao
 import com.cjstudio.start.ui.common.coletar
 import com.cjstudio.start.ui.common.lerLocal
@@ -39,6 +42,7 @@ class HomePassageiroActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomePassageiroBinding
     private val viewModel: HomePassageiroViewModel by viewModels()
     private val corridaViewModel: CorridaViewModel by viewModels()
+    private val atalhoChat: AtalhoChatViewModel by viewModels()
     private lateinit var painelCorrida: PainelCorrida
     private var mapa: GoogleMap? = null
 
@@ -80,6 +84,9 @@ class HomePassageiroActivity : AppCompatActivity() {
         binding.cabecalho.ivFoto.setOnClickListener(abrirPerfil)
         binding.cabecalho.tvMeuPerfil.setOnClickListener(abrirPerfil)
         binding.cabecalho.btnSair.setOnClickListener { viewModel.sair() }
+        // Sempre à vista embaixo do Sair; só habilita no prazo do chat.
+        binding.cabecalho.btnChat.visibility = View.VISIBLE
+        binding.cabecalho.btnChat.setOnClickListener { atalhoChat.chat.value?.id?.let { ChatActivity.abrir(this, it) } }
         binding.cardParaOnde.setOnClickListener { escolherDestino.launch(Intent(this, EscolherDestinoActivity::class.java)) }
         binding.btnPedir.setOnClickListener { viewModel.pedir() }
         binding.cbQuartoPassageiro.setOnCheckedChangeListener { botao, marcado ->
@@ -101,10 +108,15 @@ class HomePassageiroActivity : AppCompatActivity() {
 
         coletar(viewModel.passageiro) { p ->
             if (p == null) return@coletar
-            binding.cabecalho.tvOla.text = getString(R.string.home_ola, p.nomeCompleto.orEmpty().substringBefore(" "))
+            binding.cabecalho.tvOla.text = p.nomeCompleto.orEmpty().substringBefore(" ")
+            binding.cabecalho.tvPapel.setText(R.string.papel_passageiro)
             binding.cabecalho.ivFoto.carregarFotoRedonda(p.fotoUrl)
             corridaViewModel.acompanhar(p.corridaAtualId)
+            atalhoChat.acompanhar(p.ultimoChatId)
         }
+        // Chat com o motorista, embaixo do Sair.
+        coletar(atalhoChat.chat) { mostrarBotaoChat() }
+        coletar(atalhoChat.habilitado) { mostrarBotaoChat() }
         coletar(viewModel.aqui) { local ->
             if (local != null && viewModel.painel.value is Painel.Inicial && corridaViewModel.corrida.value == null) {
                 mapa?.animateCamera(CameraUpdateFactory.newLatLngZoom(local.latLng(), 15f))
@@ -120,6 +132,10 @@ class HomePassageiroActivity : AppCompatActivity() {
                 is HomePassageiroViewModel.Evento.Mensagem -> mostrarMensagem(evento.texto)
             }
         }
+    }
+
+    private fun mostrarBotaoChat() {
+        binding.cabecalho.btnChat.mostrarBotaoChat(this, atalhoChat.chat.value, atalhoChat.habilitado.value, atalhoChat.meuId)
     }
 
     @SuppressLint("MissingPermission")

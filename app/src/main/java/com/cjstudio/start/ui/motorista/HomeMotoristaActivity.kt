@@ -12,6 +12,9 @@ import com.cjstudio.start.data.model.Corrida
 import com.cjstudio.start.data.model.Motorista
 import com.cjstudio.start.data.model.StatusMotorista
 import com.cjstudio.start.databinding.ActivityHomeMotoristaBinding
+import com.cjstudio.start.ui.chat.AtalhoChatViewModel
+import com.cjstudio.start.ui.chat.ChatActivity
+import com.cjstudio.start.ui.chat.mostrarBotaoChat
 import com.cjstudio.start.ui.common.Navegacao
 import com.cjstudio.start.ui.common.coletar
 import com.cjstudio.start.ui.common.mostrarMensagem
@@ -40,6 +43,7 @@ class HomeMotoristaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeMotoristaBinding
     private val viewModel: HomeMotoristaViewModel by viewModels()
     private val corridaViewModel: CorridaViewModel by viewModels()
+    private val atalhoChat: AtalhoChatViewModel by viewModels()
     private lateinit var painelCorrida: PainelCorrida
     private var mapa: GoogleMap? = null
     private var centralizado = false
@@ -72,6 +76,7 @@ class HomeMotoristaActivity : AppCompatActivity() {
         val abrirCadastro = View.OnClickListener { startActivity(Intent(this, EditarMotoristaActivity::class.java)) }
         binding.cabecalho.tvMeuPerfil.setOnClickListener(abrirCadastro)
         binding.cabecalho.ivFoto.setOnClickListener(abrirCadastro)
+        binding.btnChat.setOnClickListener { atalhoChat.chat.value?.id?.let { ChatActivity.abrir(this, it) } }
         binding.btnAceitar.setOnClickListener { viewModel.oferta.value?.let { viewModel.aceitar(it) } }
         binding.btnRecusar.setOnClickListener { viewModel.oferta.value?.let { viewModel.recusar(it) } }
 
@@ -86,7 +91,10 @@ class HomeMotoristaActivity : AppCompatActivity() {
             if (motorista == null) return@coletar
             mostrar(motorista)
             corridaViewModel.acompanhar(motorista.corridaAtualId)
+            atalhoChat.acompanhar(motorista.ultimoChatId)
         }
+        coletar(atalhoChat.chat) { mostrarBotaoChat() }
+        coletar(atalhoChat.habilitado) { mostrarBotaoChat() }
         coletar(viewModel.aqui) { local ->
             if (local != null && !centralizado && viewModel.oferta.value == null && corridaViewModel.corrida.value == null) {
                 centralizado = true
@@ -146,10 +154,11 @@ class HomeMotoristaActivity : AppCompatActivity() {
         binding.tvOfertaDestino.text = c.destino?.endereco
     }
 
-    // Com corrida, o espaço de baixo é dela (some o botão online e a oferta).
+    // Com corrida, o espaço de baixo é dela (some o botão online e a oferta;
+    // a linha fica só com o Chat).
     private fun mostrarCorrida(corrida: Corrida?) {
         binding.painelCorrida.root.visibility = if (corrida != null) View.VISIBLE else View.GONE
-        binding.rodapeOnline.visibility = if (corrida != null) View.GONE else View.VISIBLE
+        atualizarBotaoOnline()
         if (corrida != null) {
             binding.cardOferta.visibility = View.GONE
             painelCorrida.mostrar(corrida)
@@ -183,7 +192,8 @@ class HomeMotoristaActivity : AppCompatActivity() {
     }
 
     private fun mostrar(motorista: Motorista) {
-        binding.cabecalho.tvOla.text = getString(R.string.home_ola, motorista.nomeCompleto.orEmpty().substringBefore(" "))
+        binding.cabecalho.tvOla.text = motorista.nomeCompleto.orEmpty().substringBefore(" ")
+        binding.cabecalho.tvPapel.setText(R.string.papel_motorista)
         binding.cabecalho.ivFoto.carregarFotoRedonda(motorista.fotoUrl)
         binding.cabecalho.tvLinha2.text = motorista.veiculo?.let { "${it.descricao()}  ·  ${it.placa.orEmpty()}" }.orEmpty()
 
@@ -200,10 +210,20 @@ class HomeMotoristaActivity : AppCompatActivity() {
         binding.cardSituacao.visibility = if (motorista.aprovado) View.GONE else View.VISIBLE
         binding.tvStatusMensagem.text = mensagem
 
-        binding.btnOnline.visibility = if (motorista.aprovado) View.VISIBLE else View.GONE
+        atualizarBotaoOnline()
         binding.btnOnline.setText(if (motorista.online) R.string.motorista_ficar_offline else R.string.motorista_ficar_online)
         binding.btnOnline.setBackgroundResource(if (motorista.online) R.drawable.bg_botao_contorno else R.drawable.bg_botao_primario)
         binding.btnOnline.setTextColor(ContextCompat.getColor(this, if (motorista.online) R.color.amarelo else R.color.preto))
+    }
+
+    private fun mostrarBotaoChat() {
+        binding.btnChat.mostrarBotaoChat(this, atalhoChat.chat.value, atalhoChat.habilitado.value, atalhoChat.meuId)
+    }
+
+    private fun atualizarBotaoOnline() {
+        val aprovado = viewModel.motorista.value?.aprovado == true
+        val semCorrida = corridaViewModel.corrida.value == null
+        binding.btnOnline.visibility = if (aprovado && semCorrida) View.VISIBLE else View.GONE
     }
 
     private fun motivo(motorista: Motorista, padrao: Int): String =

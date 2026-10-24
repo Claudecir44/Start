@@ -47,14 +47,15 @@ async function avisarMotoristas(corridaId, corrida, motoristas) {
     });
 }
 
-async function avisarPassageiro(passageiroId, titulo, texto, corridaId) {
+// tipo: 'corrida' ou 'chat' (o app abre a tela certa ao tocar).
+async function avisarPassageiro(passageiroId, titulo, texto, corridaId, tipo = 'corrida') {
     const token = await tokenDe('passageiros', passageiroId);
-    await enviar([token], { titulo, texto, canal: CANAL_AVISOS, dados: { tipo: 'corrida', corridaId } });
+    await enviar([token], { titulo, texto, canal: CANAL_AVISOS, dados: { tipo, corridaId } });
 }
 
-async function avisarMotorista(motoristaId, titulo, texto, corridaId) {
+async function avisarMotorista(motoristaId, titulo, texto, corridaId, tipo = 'corrida') {
     const token = await tokenDe('motoristas', motoristaId);
-    await enviar([token], { titulo, texto, canal: CANAL_AVISOS, dados: { tipo: 'corrida', corridaId } });
+    await enviar([token], { titulo, texto, canal: CANAL_AVISOS, dados: { tipo, corridaId } });
 }
 
 module.exports = { avisarMotoristas, avisarPassageiro, avisarMotorista };

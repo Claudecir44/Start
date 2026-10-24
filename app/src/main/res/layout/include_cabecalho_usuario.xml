@@ -50,6 +50,15 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
+        <!-- "Passageiro" ou "Motorista" (qual app é este). -->
+        <TextView
+            android:id="@+id/tvPapel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/amarelo"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/tvLinha2"
             android:layout_width="wrap_content"
@@ -80,6 +89,23 @@
             android:textColor="@color/amarelo"
             android:textSize="15sp"
             android:textStyle="bold" />
+
+        <!-- Chat com o motorista (só o passageiro usa aqui; o motorista tem
+             o botão na linha do Ficar online). Ver AtalhoChatViewModel. -->
+        <TextView
+            android:id="@+id/btnChat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:background="@drawable/bg_botao_contorno"
+            android:paddingStart="12dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/amarelo"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tvSituacao"

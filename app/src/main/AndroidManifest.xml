@@ -85,6 +85,10 @@
             android:name=".ui.motorista.EditarMotoristaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.chat.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- ===== Admin ===== -->
         <activity

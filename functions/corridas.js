@@ -12,6 +12,11 @@ const notificar = require('./notificacoes');
 
 const MAX_PARADAS = 3;
 
+// O chat continua aberto por 1 hora depois do fim da corrida (passageiro
+// esqueceu algo no carro); depois fica só pra leitura (chat.js).
+const CHAT_APOS_FIM_MS = 60 * 60 * 1000;
+const fimDoChat = () => admin.firestore.Timestamp.fromMillis(Date.now() + CHAT_APOS_FIM_MS);
+
 // Antes de existir motorista: só a viagem (deslocamento 0) — é o "a partir
 // de" que o passageiro vê. O valor final sai no aceite.
 async function estimar(origem, destino, quartoPassageiro) {
@@ -158,7 +163,24 @@ exports.aceitarCorrida = onCall(async (request) => {
             'busca.proximaEtapaEm': null,
             'busca.limiteEm': null,
         });
-        tx.update(motoristaRef, { corridaAtualId: corridaId });
+        tx.update(motoristaRef, { corridaAtualId: corridaId, ultimoChatId: corridaId });
+        // Chat entre os dois abre no aceite (chat.js; fecha 1 h depois do fim).
+        const c = corridaDoc.data();
+        tx.set(db.collection('chats').doc(corridaId), {
+            corridaId,
+            passageiroId: c.passageiroId,
+            passageiroNome: c.passageiroNome || '',
+            passageiroFotoUrl: c.passageiroFotoUrl || null,
+            motoristaId: uid,
+            motoristaNome: m.nomeCompleto || '',
+            motoristaFotoUrl: m.fotoUrl || null,
+            abertoEm: admin.firestore.FieldValue.serverTimestamp(),
+            fechaEm: null,
+            naoLidasPassageiro: 0,
+            naoLidasMotorista: 0,
+            ultimaMensagemEm: null,
+        });
+        tx.update(db.collection('passageiros').doc(c.passageiroId), { ultimoChatId: corridaId });
     });
 
     const v = m2(calculo.valorTotal);
@@ -239,13 +261,17 @@ exports.acaoCorrida = onCall(async (request) => {
             tx.update(corridaRef, { status: STATUS.FINALIZADA, finalizadaEm: agora });
             tx.update(db.collection('motoristas').doc(uid), { totalCorridas: admin.firestore.FieldValue.increment(1), corridaAtualId: null });
             tx.update(db.collection('passageiros').doc(c.passageiroId), { totalCorridas: admin.firestore.FieldValue.increment(1), corridaAtualId: null });
+            tx.set(db.collection('chats').doc(corridaId), { fechaEm: fimDoChat() }, { merge: true });
         } else if (acao === 'cancelar') {
             if (![STATUS.PROCURANDO, STATUS.ACEITA].includes(c.status)) {
                 throw new HttpsError('failed-precondition', 'A corrida não pode mais ser cancelada.');
             }
             tx.update(corridaRef, { status: STATUS.CANCELADA, canceladaPor: ehMotorista ? 'motorista' : 'passageiro', canceladaEm: agora });
             tx.update(db.collection('passageiros').doc(c.passageiroId), { corridaAtualId: null });
-            if (c.motoristaId) tx.update(db.collection('motoristas').doc(c.motoristaId), { corridaAtualId: null });
+            if (c.motoristaId) {
+                tx.update(db.collection('motoristas').doc(c.motoristaId), { corridaAtualId: null });
+                tx.set(db.collection('chats').doc(corridaId), { fechaEm: fimDoChat() }, { merge: true });
+            }
         } else {
             throw new HttpsError('invalid-argument', 'Ação desconhecida.');
         }

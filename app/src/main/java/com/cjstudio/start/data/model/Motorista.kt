@@ -41,6 +41,8 @@ data class Motorista(
 
     // Corrida aceita em andamento — só o servidor grava.
     var corridaAtualId: String? = null,
+    // Chat da última corrida aceita (chats/{id}) — só o servidor grava.
+    var ultimoChatId: String? = null,
 
     var totalCorridas: Int = 0,
     var avaliacaoMedia: Double = 0.0,

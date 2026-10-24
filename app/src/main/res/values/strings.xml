@@ -105,7 +105,9 @@
     <string name="motorista_erro_foto_crlv">Envie a foto do documento do carro (CRLV).</string>
 
     <!-- Telas iniciais -->
-    <string name="home_ola">Olá, %1$s!</string>
+    <!-- Embaixo do nome, no topo da tela inicial. -->
+    <string name="papel_passageiro">Passageiro</string>
+    <string name="papel_motorista">Motorista</string>
     <string name="home_para_onde">Para onde vamos?</string>
     <string name="home_para_onde_dica">Toque para escolher o destino</string>
     <string name="status_em_analise">Cadastro em análise</string>
@@ -161,6 +163,25 @@ Sexo: %3$s
     <string name="corrida_p_procurando">Procurando motorista…</string>
     <string name="corrida_p_procurando_msg">Avisamos os motoristas mais perto de você.</string>
     <string name="corrida_p_procurando_raio">Procurando motoristas até %1$s de você.</string>
+
+    <!-- Chat da corrida (só texto) -->
+    <string name="chat_botao">💬 Chat</string>
+    <string name="chat_botao_nao_lidas">💬 Chat (%1$d)</string>
+    <string name="chat_vazio">Nenhuma mensagem ainda.\nO chat fica aberto durante a corrida e até 1 hora depois do fim.</string>
+    <string name="chat_digite">Mensagem</string>
+    <string name="chat_enviar">Enviar</string>
+    <string name="chat_fechado">Chat encerrado (1 hora depois do fim da corrida). As mensagens ficam aqui só para consulta.</string>
+    <string name="chat_situacao_corrida">Chat da corrida</string>
+    <string name="chat_situacao_fecha_as">Aberto até as %1$s</string>
+    <string name="chat_situacao_fechado">Encerrado · só leitura</string>
+    <string name="chat_lida">Lida</string>
+    <string name="chat_nao_lida">Não lida</string>
+    <string name="chat_mensagem_apagada">🚫 Mensagem apagada</string>
+    <string name="chat_apagar_titulo">Apagar mensagem</string>
+    <string name="chat_apagar_para_mim">Apagar só para mim</string>
+    <string name="chat_apagar_para_todos">Apagar para todos</string>
+    <string name="chat_erro_enviar">Não foi possível enviar. O chat pode ter sido encerrado.</string>
+    <string name="chat_erro_apagar">Não foi possível apagar a mensagem.</string>
 
     <!-- Busca por etapas (2/4/10 km) — perguntas ao passageiro -->
     <string name="busca_regiao_titulo">Sem motorista por perto</string>

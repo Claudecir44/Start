@@ -200,3 +200,4 @@ exports.adicionarParada = corridas.adicionarParada;
 const busca = require("./busca");
 exports.avancarBusca = busca.avancarBusca;
 exports.responderBusca = busca.responderBusca;
+exports.enviarMensagemChat = require("./chat").enviarMensagemChat;

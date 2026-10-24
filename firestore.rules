@@ -70,7 +70,7 @@ service cloud.firestore {
         && sexoValido(request.resource.data)
         && cpfReservado('passageiro', uid);
       allow update: if (dono(uid)
-          && !alterados().hasAny(['bloqueado', 'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId']))
+          && !alterados().hasAny(['bloqueado', 'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId', 'ultimoChatId']))
         || (ehAdmin() && permissaoAdmin('passageiros') && alterados().hasOnly(['bloqueado']));
       allow delete: if false;
     }
@@ -91,14 +91,14 @@ service cloud.firestore {
         (dono(uid)
           && !alterados().hasAny(['status', 'motivoStatus', 'analisadoPor', 'analisadoEm', 'online',
                                   'totalCorridas', 'avaliacaoMedia', 'cpf', 'email', 'criadoEm', 'sexo',
-                                  'corridaAtualId'])
+                                  'corridaAtualId', 'ultimoChatId'])
           && !alterados().hasAny(camposAnalisados()))
         // Nome, nascimento, CNH ou carro: o admin aprovou esses dados, então
         // mudar qualquer um volta o cadastro pra análise (e sai do ar).
         || (dono(uid)
           && alterados().hasAny(camposAnalisados())
           && !alterados().hasAny(['analisadoPor', 'analisadoEm', 'totalCorridas', 'avaliacaoMedia',
-                                  'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId'])
+                                  'cpf', 'email', 'criadoEm', 'sexo', 'corridaAtualId', 'ultimoChatId'])
           && request.resource.data.status == 'em_analise'
           && request.resource.data.online == false)
         // Ficar online só aprovado; ficar offline sempre.
@@ -144,6 +144,51 @@ service cloud.firestore {
     }
 
     // ===== Configuração (tarifa) =====
+    // ===== Chat da corrida (só texto) =====
+    // Criado pelo servidor no aceite; fechaEm = 1 h depois do fim da corrida.
+    // Fechado: os dois continuam lendo, mas ninguém envia nem apaga mais.
+    match /chats/{chatId} {
+      function participante(c) {
+        return logado() && (c.passageiroId == request.auth.uid || c.motoristaId == request.auth.uid);
+      }
+      function aberto(c) {
+        return c.fechaEm == null || request.time < c.fechaEm;
+      }
+
+      allow read: if participante(resource.data) || (ehAdmin() && permissaoAdmin('corridas'));
+      // Cada lado só zera o próprio contador de não lidas.
+      allow update: if participante(resource.data) && (
+        (resource.data.passageiroId == request.auth.uid
+          && alterados().hasOnly(['naoLidasPassageiro']) && request.resource.data.naoLidasPassageiro == 0)
+        || (resource.data.motoristaId == request.auth.uid
+          && alterados().hasOnly(['naoLidasMotorista']) && request.resource.data.naoLidasMotorista == 0));
+      allow create, delete: if false;
+
+      match /mensagens/{mensagemId} {
+        function chat() {
+          return get(/databases/$(database)/documents/chats/$(chatId)).data;
+        }
+        allow read: if participante(chat()) || (ehAdmin() && permissaoAdmin('corridas'));
+        // Enviar só pela Cloud Function enviarMensagemChat (functions/chat.js):
+        // ela confere quem e se está aberto, soma as não lidas e manda o push.
+        allow create: if false;
+        allow update: if participante(chat()) && (
+          // Quem recebeu marca como lida (mesmo com o chat fechado).
+          (resource.data.destinatarioId == request.auth.uid
+            && alterados().hasOnly(['lida']) && request.resource.data.lida == true)
+          // Apagar só pra mim (cada lado esconde da própria tela).
+          || (aberto(chat()) && resource.data.remetenteId == request.auth.uid
+            && alterados().hasOnly(['deletadoParaRemetente']) && request.resource.data.deletadoParaRemetente == true)
+          || (aberto(chat()) && resource.data.destinatarioId == request.auth.uid
+            && alterados().hasOnly(['deletadoParaDestinatario']) && request.resource.data.deletadoParaDestinatario == true)
+          // Apagar pra todos: só quem enviou; o texto some de verdade.
+          || (aberto(chat()) && resource.data.remetenteId == request.auth.uid
+            && alterados().hasOnly(['deletadoParaTodos', 'conteudo'])
+            && request.resource.data.deletadoParaTodos == true && request.resource.data.conteudo == ''));
+        allow delete: if false;
+      }
+    }
+
     match /config/{id} {
       allow read: if logado();
       allow write: if ehAdmin() && permissaoAdmin('financeiro');

@@ -23,6 +23,8 @@ data class Passageiro(
     // Corrida em andamento (procurando/aceita/em_andamento) — só o servidor
     // grava (pedirCorrida/acaoCorrida); o app escuta pra abrir a corrida.
     var corridaAtualId: String? = null,
+    // Chat da última corrida aceita (chats/{id}) — só o servidor grava.
+    var ultimoChatId: String? = null,
 
     // Mantidos pelo servidor.
     var totalCorridas: Int = 0,

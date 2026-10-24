@@ -3,7 +3,9 @@ package com.cjstudio.start.di
 import com.cjstudio.start.data.repository.AdminRepository
 import com.cjstudio.start.data.repository.ArquivoRepository
 import com.cjstudio.start.data.repository.AuthRepository
+import com.cjstudio.start.data.repository.ChatRepository
 import com.cjstudio.start.data.repository.CorridaRepository
+import com.cjstudio.start.data.repository.IChatRepository
 import com.cjstudio.start.data.repository.EnderecoRepository
 import com.cjstudio.start.data.repository.ICorridaRepository
 import com.cjstudio.start.data.repository.IEnderecoRepository
@@ -75,4 +77,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindNotificacaoRepository(impl: NotificacaoRepository): INotificacaoRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindChatRepository(impl: ChatRepository): IChatRepository
 }

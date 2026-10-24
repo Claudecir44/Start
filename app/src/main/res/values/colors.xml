@@ -15,5 +15,8 @@
     <color name="branco">#FFFFFF</color>
     <color name="verde">#2ECC71</color>
     <color name="vermelho">#FF5A5A</color>
+    <!-- "Lida"/"Não lida" sobre o balão amarelo do chat. -->
+    <color name="verde_escuro">#0B7A33</color>
+    <color name="vermelho_escuro">#B3261E</color>
     <color name="ic_launcher_background">#07080B</color>
 </resources>
