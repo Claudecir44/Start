@@ -76,7 +76,7 @@ class HomeMotoristaActivity : AppCompatActivity() {
         val abrirCadastro = View.OnClickListener { startActivity(Intent(this, EditarMotoristaActivity::class.java)) }
         binding.cabecalho.tvMeuPerfil.setOnClickListener(abrirCadastro)
         binding.cabecalho.ivFoto.setOnClickListener(abrirCadastro)
-        binding.btnChat.setOnClickListener { atalhoChat.chat.value?.id?.let { ChatActivity.abrir(this, it) } }
+        binding.btnChatMotorista.setOnClickListener { atalhoChat.chat.value?.id?.let { ChatActivity.abrir(this, it) } }
         binding.btnAceitar.setOnClickListener { viewModel.oferta.value?.let { viewModel.aceitar(it) } }
         binding.btnRecusar.setOnClickListener { viewModel.oferta.value?.let { viewModel.recusar(it) } }
 
@@ -217,7 +217,7 @@ class HomeMotoristaActivity : AppCompatActivity() {
     }
 
     private fun mostrarBotaoChat() {
-        binding.btnChat.mostrarBotaoChat(this, atalhoChat.chat.value, atalhoChat.habilitado.value, atalhoChat.meuId)
+        binding.btnChatMotorista.mostrarBotaoChat(this, atalhoChat.chat.value, atalhoChat.habilitado.value, atalhoChat.meuId)
     }
 
     private fun atualizarBotaoOnline() {
