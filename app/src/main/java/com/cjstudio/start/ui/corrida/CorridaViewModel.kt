@@ -21,8 +21,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -63,6 +67,27 @@ class CorridaViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { tarifas.buscar().onSuccess { _tarifa.value = it } }
+        if (!AppTipo.ehMotorista) relogioDaBusca()
+    }
+
+    // Passageiro: o servidor não tem agendador, então é o app que avisa
+    // quando vence um prazo da busca (troca de etapa, 3 minutos, pergunta
+    // sem resposta). Depois do prazo repete a cada poucos segundos até a
+    // busca mudar (o relógio do celular pode estar um pouco adiantado).
+    private fun relogioDaBusca() {
+        viewModelScope.launch {
+            corrida.map { c -> c?.takeIf { it.status == StatusCorrida.PROCURANDO }?.let { it.id to it.busca?.proximoPrazo } }
+                .distinctUntilChanged()
+                .collectLatest { par ->
+                    val id = par?.first ?: return@collectLatest
+                    val prazo = par.second ?: return@collectLatest
+                    delay((prazo.time - System.currentTimeMillis()).coerceAtLeast(0) + MARGEM_PRAZO_MS)
+                    while (true) {
+                        corridas.avancarBusca(id)
+                        delay(REPETIR_PRAZO_MS)
+                    }
+                }
+        }
     }
 
     // Corrida nova (ou a mesma) pra acompanhar. null não fecha a que está na
@@ -100,6 +125,9 @@ class CorridaViewModel @Inject constructor(
     fun cancelar() = executar { corridas.cancelar(it) }
     fun adicionarParada(parada: Local) = executar { corridas.adicionarParada(it, parada) }
 
+    // Resposta à pergunta da busca (continuar procurando ou encerrar).
+    fun responderBusca(continuar: Boolean) = executar { corridas.responderBusca(it, continuar) }
+
     private fun executar(acao: suspend (String) -> Result<Unit>) {
         val id = corrida.value?.id ?: return
         if (_enviando.value) return
@@ -112,5 +140,7 @@ class CorridaViewModel @Inject constructor(
 
     private companion object {
         const val INTERVALO_POSICAO_MS = 5_000L
+        const val MARGEM_PRAZO_MS = 1_500L
+        const val REPETIR_PRAZO_MS = 5_000L
     }
 }

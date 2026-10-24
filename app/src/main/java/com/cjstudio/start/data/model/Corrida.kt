@@ -67,7 +67,12 @@ data class Corrida(
     var veiculo: Veiculo? = null,
     var motoristaLocal: Local? = null,
 
+    // Busca de motorista por etapas (2/4/10 km), controlada pelo servidor.
+    var busca: BuscaCorrida? = null,
+
+    // "passageiro", "motorista" ou "sistema" (pergunta da busca sem resposta).
     var canceladaPor: String? = null,
+    var motivoCancelamento: String? = null,
 
     var criadaEm: Date? = null,
     var aceitaEm: Date? = null,
@@ -78,6 +83,42 @@ data class Corrida(
     @get:Exclude
     val ativa: Boolean
         get() = status in StatusCorrida.ATIVAS
+}
+
+// corridas/{id}.busca — mesmos nomes e prazos de functions/busca.js.
+//   etapa 1: até 2 km · etapa 2: até 4 km · etapa 3: até 10 km.
+// Com pergunta != null a busca fica parada esperando o passageiro responder
+// até respostaAte (senão o servidor encerra).
+data class BuscaCorrida(
+    var etapa: Int = 0,
+    var raioKm: Double = 0.0,
+    var proximaEtapaEm: Date? = null,
+    var limiteEm: Date? = null,
+    var pergunta: String? = null,
+    var respostaAte: Date? = null,
+    var valorNovo: Double? = null,
+    var calculoNovo: CalculoCorrida? = null,
+    var restanteMs: Long? = null,
+    var avisados: List<String> = emptyList()
+) {
+    // Próximo prazo que faz a busca andar (o app chama avancarBusca nele).
+    @get:Exclude
+    val proximoPrazo: Date?
+        get() = if (pergunta != null) respostaAte else listOfNotNull(proximaEtapaEm, limiteEm).minOrNull()
+
+    // Prazo já vencido: o motorista não deve mais ver esta oferta.
+    fun vencida(agoraMs: Long): Boolean =
+        pergunta != null || (limiteEm?.time?.let { agoraMs >= it + FOLGA_PRAZO_MS } ?: false)
+
+    companion object {
+        const val PERGUNTA_REGIAO = "regiao"
+        const val PERGUNTA_NOVO_VALOR = "novo_valor"
+        const val PERGUNTA_SEM_MOTORISTA = "sem_motorista"
+
+        // O app do passageiro pode estar fechado: depois do prazo + folga a
+        // oferta some pro motorista mesmo sem o servidor ter processado.
+        private const val FOLGA_PRAZO_MS = 30_000L
+    }
 }
 
 // Resposta de estimarCorrida (antes de pedir): rota e preço.

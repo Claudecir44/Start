@@ -7,15 +7,6 @@ const admin = require('firebase-admin');
 const CANAL_CORRIDAS = 'corridas';
 const CANAL_AVISOS = 'avisos';
 
-function distanciaMetros(a, b) {
-    const r = 6371000;
-    const rad = (g) => (g * Math.PI) / 180;
-    const dLat = rad(b.lat - a.lat);
-    const dLng = rad(b.lng - a.lng);
-    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-    return 2 * r * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
-
 async function enviar(tokens, { titulo, texto, canal, dados }) {
     const lista = [...new Set(tokens.filter(Boolean))];
     if (lista.length === 0) return;
@@ -43,17 +34,10 @@ async function tokenDe(colecao, uid) {
     return doc.exists ? doc.get('fcmToken') : null;
 }
 
-// "Nova corrida" pra motoristas aprovados, online, livres e perto da partida.
-async function avisarMotoristasProximos(corridaId, corrida, raioKm) {
-    const snap = await admin.firestore().collection('motoristas')
-        .where('online', '==', true)
-        .where('status', '==', 'aprovado')
-        .get();
-    const tokens = snap.docs
-        .map((d) => d.data())
-        .filter((m) => !m.corridaAtualId && m.fcmToken && m.localizacao)
-        .filter((m) => distanciaMetros(m.localizacao, corrida.origem) <= raioKm * 1000)
-        .map((m) => m.fcmToken);
+// "Nova corrida" pros motoristas da etapa da busca (lista de busca.js:
+// aprovados, online, livres e dentro do raio).
+async function avisarMotoristas(corridaId, corrida, motoristas) {
+    const tokens = motoristas.map((m) => m.fcmToken);
     const extra = corrida.quartoPassageiro ? ' · 4 passageiros (+20%)' : '';
     await enviar(tokens, {
         titulo: 'Nova corrida perto de você',
@@ -73,4 +57,4 @@ async function avisarMotorista(motoristaId, titulo, texto, corridaId) {
     await enviar([token], { titulo, texto, canal: CANAL_AVISOS, dados: { tipo: 'corrida', corridaId } });
 }
 
-module.exports = { avisarMotoristasProximos, avisarPassageiro, avisarMotorista };
+module.exports = { avisarMotoristas, avisarPassageiro, avisarMotorista };

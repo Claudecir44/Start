@@ -18,6 +18,11 @@ interface ICorridaRepository {
     // Parada extra pedida pelo passageiro durante a corrida (+ valor por parada).
     suspend fun adicionarParada(corridaId: String, parada: Local): Result<Unit>
 
+    // Busca por etapas: faz o relógio andar quando um prazo vence (troca de
+    // etapa, 3 minutos, pergunta sem resposta) e responde a pergunta.
+    suspend fun avancarBusca(corridaId: String): Result<Unit>
+    suspend fun responderBusca(corridaId: String, continuar: Boolean): Result<Unit>
+
     // Motorista aceita (só um consegue, o servidor garante).
     suspend fun aceitar(corridaId: String): Result<Unit>
 

@@ -2,7 +2,9 @@ package com.cjstudio.start.ui.corrida
 
 import android.content.Context
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import com.cjstudio.start.R
+import com.cjstudio.start.data.model.BuscaCorrida
 import com.cjstudio.start.data.model.Corrida
 import com.cjstudio.start.data.model.Local
 import com.cjstudio.start.data.model.StatusCorrida
@@ -31,6 +33,8 @@ class PainelCorrida(
     private var carro: Marker? = null
     private var desenhoAtual: String? = null
     private var enquadradoEm: String? = null
+    private var dialogoPergunta: AlertDialog? = null
+    private var chavePergunta: String? = null
 
     init {
         painel.btnLigar.setOnClickListener {
@@ -56,6 +60,7 @@ class PainelCorrida(
     // ===================== Painel =====================
 
     fun mostrar(c: Corrida) {
+        if (!ehMotorista) mostrarPerguntaDaBusca(c)
         val (titulo, detalhe) = if (ehMotorista) textosMotorista(c) else textosPassageiro(c)
         painel.tvSituacao.setText(titulo)
         painel.tvDetalhe.text = detalhe
@@ -119,14 +124,63 @@ class PainelCorrida(
     }
 
     private fun textosPassageiro(c: Corrida): Pair<Int, String> = when (c.status) {
-        StatusCorrida.PROCURANDO -> R.string.corrida_p_procurando to context.getString(R.string.corrida_p_procurando_msg)
+        StatusCorrida.PROCURANDO -> R.string.corrida_p_procurando to (
+            c.busca?.raioKm?.takeIf { it > 0 }
+                ?.let { context.getString(R.string.corrida_p_procurando_raio, MapaUtil.distancia((it * 1000).toLong())) }
+                ?: context.getString(R.string.corrida_p_procurando_msg)
+            )
         StatusCorrida.ACEITA -> R.string.corrida_p_a_caminho to context.getString(R.string.corrida_p_a_caminho_msg)
         StatusCorrida.EM_ANDAMENTO -> R.string.corrida_p_em_viagem to context.getString(R.string.corrida_p_em_viagem_msg)
         StatusCorrida.FINALIZADA -> R.string.corrida_p_finalizada to context.getString(R.string.corrida_p_finalizada_msg, MapaUtil.valor(c.valor))
         else -> R.string.corrida_cancelada to context.getString(
-            if (c.canceladaPor == "motorista") R.string.corrida_cancelada_pelo_motorista else R.string.corrida_cancelada_por_voce
+            when {
+                c.canceladaPor == "motorista" -> R.string.corrida_cancelada_pelo_motorista
+                c.canceladaPor == "sistema" -> R.string.busca_encerrada_sem_resposta
+                c.motivoCancelamento == "nao_quis_continuar" -> R.string.busca_encerrada_por_voce
+                else -> R.string.corrida_cancelada_por_voce
+            }
         )
     }
+
+    // ===================== Busca por etapas (passageiro) =====================
+
+    // Pergunta do servidor (sem motorista perto / novo valor / ninguém
+    // aceitou em 3 minutos): Sim continua, Não encerra. Sem resposta em
+    // 1 minuto o servidor encerra sozinho e o diálogo some.
+    private fun mostrarPerguntaDaBusca(c: Corrida) {
+        val b = c.busca
+        val pergunta = b?.pergunta?.takeIf { c.status == StatusCorrida.PROCURANDO }
+        val chave = pergunta?.let { "${c.id}|$it|${b.respostaAte?.time}" }
+        if (chave == chavePergunta) return
+        dialogoPergunta?.dismiss()
+        dialogoPergunta = null
+        chavePergunta = chave
+        if (pergunta == null) return
+
+        val p = when (pergunta) {
+            BuscaCorrida.PERGUNTA_REGIAO -> Pergunta(
+                R.string.busca_regiao_titulo, context.getString(R.string.busca_regiao_msg), R.string.busca_sim, R.string.busca_nao
+            )
+            BuscaCorrida.PERGUNTA_NOVO_VALOR -> Pergunta(
+                R.string.busca_novo_valor_titulo,
+                context.getString(R.string.busca_novo_valor_msg, MapaUtil.valor(b.valorNovo ?: c.valor)),
+                R.string.busca_aceitar_valor, R.string.busca_nao
+            )
+            else -> Pergunta(
+                R.string.busca_sem_motorista_titulo, context.getString(R.string.busca_sem_motorista_msg),
+                R.string.busca_continuar, R.string.busca_encerrar
+            )
+        }
+        dialogoPergunta = MaterialAlertDialogBuilder(context)
+            .setTitle(p.titulo)
+            .setMessage(context.getString(R.string.busca_prazo_resposta, p.mensagem))
+            .setCancelable(false)
+            .setPositiveButton(p.sim) { _, _ -> viewModel.responderBusca(true) }
+            .setNegativeButton(p.nao) { _, _ -> viewModel.responderBusca(false) }
+            .show()
+    }
+
+    private class Pergunta(val titulo: Int, val mensagem: String, val sim: Int, val nao: Int)
 
     private fun textosMotorista(c: Corrida): Pair<Int, String> = when (c.status) {
         StatusCorrida.ACEITA -> R.string.corrida_m_buscar to context.getString(R.string.corrida_m_buscar_msg)

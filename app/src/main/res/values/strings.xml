@@ -160,6 +160,23 @@ Sexo: %3$s
     <string name="corrida_cancelada_pelo_passageiro">O passageiro cancelou a corrida.</string>
     <string name="corrida_p_procurando">Procurando motorista…</string>
     <string name="corrida_p_procurando_msg">Avisamos os motoristas mais perto de você.</string>
+    <string name="corrida_p_procurando_raio">Procurando motoristas até %1$s de você.</string>
+
+    <!-- Busca por etapas (2/4/10 km) — perguntas ao passageiro -->
+    <string name="busca_regiao_titulo">Sem motorista por perto</string>
+    <string name="busca_regiao_msg">Não há motorista disponível na sua região próxima. Deseja continuar?</string>
+    <string name="busca_novo_valor_titulo">Novo valor da corrida</string>
+    <string name="busca_novo_valor_msg">Procurando motoristas até 10 km, a corrida fica em %1$s (o caminho do motorista até você + a viagem). Aceita continuar?</string>
+    <string name="busca_sem_motorista_titulo">Motorista não disponível</string>
+    <string name="busca_sem_motorista_msg">Nenhum motorista aceitou a corrida. Deseja encerrar ou continuar procurando?</string>
+    <string name="busca_prazo_resposta">%1$s\n\nSe você não responder em 1 minuto, a busca é encerrada.</string>
+    <string name="busca_sim">Sim</string>
+    <string name="busca_nao">Não</string>
+    <string name="busca_aceitar_valor">Aceito</string>
+    <string name="busca_continuar">Continuar</string>
+    <string name="busca_encerrar">Encerrar</string>
+    <string name="busca_encerrada_sem_resposta">A busca foi encerrada porque não houve resposta. Peça de novo quando quiser.</string>
+    <string name="busca_encerrada_por_voce">Você encerrou a busca. Peça de novo quando quiser.</string>
     <string name="corrida_p_a_caminho">Motorista a caminho</string>
     <string name="corrida_p_a_caminho_msg">Espere no local de partida. Confira a placa antes de entrar.</string>
     <string name="corrida_p_em_viagem">Em viagem</string>

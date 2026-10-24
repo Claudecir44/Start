@@ -1,77 +1,16 @@
 // Ciclo da corrida: estimar, pedir, aceitar, embarcar, parada extra,
 // finalizar, cancelar. Preço, aceite e mudança de situação acontecem SÓ aqui
 // (Admin SDK): firestore.rules não deixa o app criar corrida nem mudar
-// status/valor. As regras de preço ficam em tarifa.js.
+// status/valor. As regras de preço ficam em tarifa.js e a busca de motorista
+// por etapas (2/4/10 km) em busca.js.
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
 const admin = require('firebase-admin');
-const { TARIFA_PADRAO, calcularCorrida } = require('./tarifa');
+const { calcularCorrida } = require('./tarifa');
+const { STATUS, ATIVAS, exigirLogin, lerLocal, lerTarifa, calcularRota, m2 } = require('./comum');
+const busca = require('./busca');
 const notificar = require('./notificacoes');
 
-const MAPS_SERVER_KEY = process.env.MAPS_SERVER_KEY || '';
-
-// Precisa bater com StatusCorrida no app.
-const STATUS = {
-    PROCURANDO: 'procurando',
-    ACEITA: 'aceita',
-    EM_ANDAMENTO: 'em_andamento',
-    FINALIZADA: 'finalizada',
-    CANCELADA: 'cancelada',
-};
-const ATIVAS = [STATUS.PROCURANDO, STATUS.ACEITA, STATUS.EM_ANDAMENTO];
 const MAX_PARADAS = 3;
-
-function exigirLogin(request) {
-    const uid = request.auth && request.auth.uid;
-    if (!uid) throw new HttpsError('unauthenticated', 'Entre na sua conta para continuar.');
-    return uid;
-}
-
-function lerLocal(valor, nome) {
-    const lat = Number(valor && valor.lat);
-    const lng = Number(valor && valor.lng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-        throw new HttpsError('invalid-argument', 'Local de ' + nome + ' inválido.');
-    }
-    const endereco = String((valor && valor.endereco) || '').trim().slice(0, 300);
-    return { endereco, lat, lng };
-}
-
-async function lerTarifa() {
-    const doc = await admin.firestore().collection('config').doc('tarifa').get();
-    return { ...TARIFA_PADRAO, ...(doc.exists ? doc.data() : {}) };
-}
-
-// Rota de carro com trânsito (Google Routes API).
-async function calcularRota(origem, destino) {
-    if (!MAPS_SERVER_KEY) throw new HttpsError('failed-precondition', 'Mapa não configurado no servidor.');
-    const resposta = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Goog-Api-Key': MAPS_SERVER_KEY,
-            'X-Goog-FieldMask': 'routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline',
-        },
-        body: JSON.stringify({
-            origin: { location: { latLng: { latitude: origem.lat, longitude: origem.lng } } },
-            destination: { location: { latLng: { latitude: destino.lat, longitude: destino.lng } } },
-            travelMode: 'DRIVE',
-            routingPreference: 'TRAFFIC_AWARE',
-            languageCode: 'pt-BR',
-            regionCode: 'BR',
-        }),
-    });
-    const corpo = await resposta.json().catch(() => ({}));
-    const rota = corpo.routes && corpo.routes[0];
-    if (!resposta.ok || !rota) {
-        console.warn('Routes API sem rota:', resposta.status, JSON.stringify(corpo).slice(0, 500));
-        throw new HttpsError('not-found', 'Não encontramos um caminho de carro entre esses dois pontos.');
-    }
-    return {
-        distanciaMetros: Number(rota.distanceMeters || 0),
-        duracaoSegundos: parseInt(String(rota.duration || '0s').replace('s', ''), 10) || 0,
-        polyline: (rota.polyline && rota.polyline.encodedPolyline) || '',
-    };
-}
 
 // Antes de existir motorista: só a viagem (deslocamento 0) — é o "a partir
 // de" que o passageiro vê. O valor final sai no aceite.
@@ -112,13 +51,15 @@ exports.pedirCorrida = onCall(async (request) => {
     const p = perfil.data();
     if (p.bloqueado) throw new HttpsError('permission-denied', 'Sua conta está bloqueada.');
     if (p.corridaAtualId) {
+        // Busca antiga com prazo vencido (app fechado) é encerrada aqui.
+        await busca.processar(db.collection('corridas').doc(p.corridaAtualId));
         const atual = await db.collection('corridas').doc(p.corridaAtualId).get();
         if (atual.exists && ATIVAS.includes(atual.data().status)) {
             throw new HttpsError('failed-precondition', 'Você já tem uma corrida em andamento.');
         }
     }
 
-    const { rota, tarifa, calculo } = await estimar(origem, destino, quartoPassageiro);
+    const { rota, calculo } = await estimar(origem, destino, quartoPassageiro);
     const corridaRef = db.collection('corridas').doc();
     const corrida = {
         status: STATUS.PROCURANDO,
@@ -145,7 +86,8 @@ exports.pedirCorrida = onCall(async (request) => {
     lote.update(perfilRef, { corridaAtualId: corridaRef.id });
     await lote.commit();
 
-    await notificar.avisarMotoristasProximos(corridaRef.id, corrida, tarifa.raioBuscaKm);
+    // Etapa 1 (até 2 km) e o push pros motoristas dela.
+    await busca.iniciar(corridaRef);
     return { corridaId: corridaRef.id, valor: calculo.valorTotal };
 });
 
@@ -159,6 +101,9 @@ exports.aceitarCorrida = onCall(async (request) => {
     const motoristaRef = db.collection('motoristas').doc(uid);
     const corridaRef = db.collection('corridas').doc(corridaId);
 
+    // Prazo da busca vencido (pergunta sem resposta) encerra antes do aceite.
+    await busca.processar(corridaRef);
+
     // Rota e preço FORA da transação (chamada externa); a transação só
     // confere que nada mudou e grava.
     const [motoristaAntes, corridaAntes, tarifa] = await Promise.all([motoristaRef.get(), corridaRef.get(), lerTarifa()]);
@@ -169,6 +114,7 @@ exports.aceitarCorrida = onCall(async (request) => {
     const local = motoristaAntes.data().localizacao;
     if (!local) throw new HttpsError('failed-precondition', 'Ative a localização para aceitar corridas.');
     const c0 = corridaAntes.data();
+    busca.conferirAceite(c0, local);
     const deslocamento = await calcularRota(local, c0.origem);
     const calculo = calcularCorrida(tarifa, {
         deslocamentoMetros: deslocamento.distanciaMetros,
@@ -189,6 +135,9 @@ exports.aceitarCorrida = onCall(async (request) => {
         if (!corridaDoc.exists || corridaDoc.data().status !== STATUS.PROCURANDO) {
             throw new HttpsError('failed-precondition', 'Esta corrida já foi aceita por outro motorista ou cancelada.');
         }
+        if (corridaDoc.data().busca && corridaDoc.data().busca.pergunta) {
+            throw new HttpsError('failed-precondition', 'O passageiro está decidindo se continua. Tente de novo em instantes.');
+        }
         if (corridaDoc.data().passageiroId === uid) {
             throw new HttpsError('failed-precondition', 'Você não pode aceitar a sua própria corrida.');
         }
@@ -206,6 +155,8 @@ exports.aceitarCorrida = onCall(async (request) => {
             valor: calculo.valorTotal,
             calculo,
             aceitaEm: admin.firestore.FieldValue.serverTimestamp(),
+            'busca.proximaEtapaEm': null,
+            'busca.limiteEm': null,
         });
         tx.update(motoristaRef, { corridaAtualId: corridaId });
     });
@@ -215,10 +166,6 @@ exports.aceitarCorrida = onCall(async (request) => {
         (motoristaAntes.data().nomeCompleto || 'O motorista') + ' aceitou sua corrida. Valor: ' + v + '.', corridaId);
     return { ok: true, valor: calculo.valorTotal };
 });
-
-function m2(v) {
-    return 'R$ ' + v.toFixed(2).replace('.', ',');
-}
 
 // Passageiro pede uma parada extra durante a corrida: + valorPorParada.
 exports.adicionarParada = onCall(async (request) => {

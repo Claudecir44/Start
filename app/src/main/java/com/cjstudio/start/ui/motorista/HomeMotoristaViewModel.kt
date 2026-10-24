@@ -88,10 +88,15 @@ class HomeMotoristaViewModel @Inject constructor(
         combine(lista, _aqui, recusadas) { disponiveis, aqui, recusadasAgora ->
             if (aqui == null) return@combine null
             val uid = auth.uidLogado()
+            val agora = System.currentTimeMillis()
             disponiveis.asSequence()
                 .filter { it.id !in recusadasAgora && it.passageiroId != uid }
+                // Busca parada numa pergunta ao passageiro ou com prazo vencido.
+                .filter { it.busca?.vencida(agora) != true }
                 .mapNotNull { c -> c.origem?.let { ofertaDe(c, MapaUtil.distanciaMetros(aqui, it)) } }
-                .filter { it.metrosAtePartida <= tarifa.raioBuscaKm * 1000 }
+                // Raio da etapa atual da busca (2, 4 ou 10 km); corridas antigas
+                // sem busca usam o raio da tarifa.
+                .filter { it.metrosAtePartida <= raioDaBusca(it.corrida) * 1000 }
                 .minByOrNull { it.metrosAtePartida }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -111,6 +116,9 @@ class HomeMotoristaViewModel @Inject constructor(
             }
         }
     }
+
+    private fun raioDaBusca(c: Corrida): Double =
+        c.busca?.raioKm?.takeIf { it > 0 } ?: tarifa.raioBuscaKm
 
     private fun ofertaDe(c: Corrida, metrosAtePartida: Double): Oferta {
         val (deslocMetros, deslocSegundos) = CalculadoraTarifa.estimarDeslocamento(metrosAtePartida)

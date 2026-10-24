@@ -63,6 +63,16 @@ class CorridaRepository @Inject constructor(
         Unit
     }
 
+    override suspend fun avancarBusca(corridaId: String): Result<Unit> = runCatching {
+        chamar("avancarBusca", mapOf("corridaId" to corridaId))
+        Unit
+    }
+
+    override suspend fun responderBusca(corridaId: String, continuar: Boolean): Result<Unit> = runCatching {
+        chamar("responderBusca", mapOf("corridaId" to corridaId, "continuar" to continuar))
+        Unit
+    }
+
     override suspend fun aceitar(corridaId: String): Result<Unit> = runCatching {
         chamar("aceitarCorrida", mapOf("corridaId" to corridaId))
         Unit
